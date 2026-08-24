@@ -414,24 +414,93 @@
             ↻
         </button>
 
-        <div class="profile">
+         <div class="profile" id="profileMenu">
 
-            <!-- CHANGED: dynamic initials -->
+    <button
+        type="button"
+        class="profile-trigger"
+        id="profileTrigger"
+        aria-label="Open profile menu"
+    >
+
+        <div
+            class="profile-avatar"
+            id="profileAvatar"
+        >
+            SR
+        </div>
+
+        <span id="profileName">
+            Suresh
+        </span>
+
+        <span class="profile-arrow">
+            ▾
+        </span>
+
+    </button>
+
+
+    <!-- PROFILE DROPDOWN -->
+
+    <div
+        class="profile-dropdown"
+        id="profileDropdown"
+    >
+
+        <div class="profile-dropdown-header">
+
             <div
-                class="profile-avatar"
-                id="profileAvatar"
+                class="profile-dropdown-avatar"
+                id="dropdownAvatar"
             >
                 SR
             </div>
 
-            <!-- CHANGED: dynamic name -->
-            <span id="profileName">
-                Suresh
-            </span>
+            <div>
+
+                <div
+                    class="profile-dropdown-name"
+                    id="dropdownName"
+                >
+                    Suresh
+                </div>
+
+                <div
+                    class="profile-dropdown-email"
+                    id="dropdownEmail"
+                >
+                    --
+                </div>
+
+            </div>
 
         </div>
 
+
+        <div class="profile-divider"></div>
+
+
+        <button
+            type="button"
+            class="profile-menu-item logout-item"
+            id="logoutButton"
+        >
+
+            <span class="menu-icon">
+                ↪
+            </span>
+
+            <span>
+                Logout
+            </span>
+
+        </button>
+
     </div>
+
+</div>
+   </div>
 
 </header>
 
@@ -1515,6 +1584,47 @@
                 initials;
 
         }
+/* ========================================================
+   PROFILE DROPDOWN USER DETAILS
+======================================================== */
+
+const dropdownName =
+    document.getElementById(
+        "dropdownName"
+    );
+
+if (dropdownName) {
+
+    dropdownName.textContent =
+        name;
+
+}
+
+
+const dropdownEmail =
+    document.getElementById(
+        "dropdownEmail"
+    );
+
+if (dropdownEmail) {
+
+    dropdownEmail.textContent =
+        user.email || "";
+
+}
+
+
+const dropdownAvatar =
+    document.getElementById(
+        "dropdownAvatar"
+    );
+
+if (dropdownAvatar) {
+
+    dropdownAvatar.textContent =
+        initials;
+
+}
 
 
         /*
@@ -1697,7 +1807,411 @@
 
 </footer>
 
+<script>
+/* ============================================================
+   PROFILE DROPDOWN + LOGOUT
+   FINAL FIX
+============================================================ */
 
+(function () {
+
+    const profileTrigger =
+        document.getElementById("profileTrigger");
+
+    const profileDropdown =
+        document.getElementById("profileDropdown");
+
+    const profileMenu =
+        document.getElementById("profileMenu");
+
+    const logoutBtn =
+        document.getElementById("logoutBtn");
+
+    if (!profileTrigger || !profileDropdown) {
+        console.error("Profile menu elements not found.");
+        return;
+    }
+
+
+    /* ========================================================
+       PROFILE CLICK
+    ======================================================== */
+
+    profileTrigger.addEventListener("click", function (event) {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        const isOpen =
+            profileDropdown.style.display === "block";
+
+        if (isOpen) {
+
+            profileDropdown.style.display = "none";
+
+        } else {
+
+            profileDropdown.style.display = "block";
+
+        }
+
+    });
+
+
+    /* ========================================================
+       CLICK OUTSIDE
+    ======================================================== */
+
+    document.addEventListener("click", function (event) {
+
+        if (
+            profileMenu &&
+            !profileMenu.contains(event.target)
+        ) {
+
+            profileDropdown.style.display = "none";
+
+        }
+
+    });
+
+
+    /* ========================================================
+       LOGOUT
+    ======================================================== */
+
+    if (logoutBtn) {
+
+        logoutBtn.addEventListener("click", async function () {
+
+            logoutBtn.disabled = true;
+
+            logoutBtn.innerHTML =
+                '<span class="menu-icon">◌</span>' +
+                '<span>Logging out...</span>';
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/auth/logout",
+                        {
+                            method: "POST",
+                            credentials: "include",
+                            headers: {
+                                "Accept":
+                                    "application/json"
+                            }
+                        }
+                    );
+
+
+                if (response.ok) {
+
+                    window.location.href = "/";
+
+                    return;
+                }
+
+
+                throw new Error(
+                    "Logout failed."
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Logout error:",
+                    error
+                );
+
+                alert(
+                    "Unable to logout."
+                );
+
+                logoutBtn.disabled =
+                    false;
+
+                logoutBtn.innerHTML =
+                    '<span class="menu-icon">↪</span>' +
+                    '<span>Logout</span>';
+
+            }
+
+        });
+
+    }
+
+})();
+</script>
+<script>
+/* ============================================================
+   NEONSOCIAL PROFILE DROPDOWN
+   FINAL VERSION
+============================================================ */
+
+(function () {
+
+    function setupProfileMenu() {
+
+        const trigger =
+            document.getElementById(
+                "profileTrigger"
+            );
+
+        const dropdown =
+            document.getElementById(
+                "profileDropdown"
+            );
+
+        const logout =
+            document.getElementById(
+                "logoutBtn"
+            );
+
+
+        if (!trigger || !dropdown) {
+
+            console.error(
+                "NeonSocial: profile menu not found."
+            );
+
+            return;
+        }
+
+
+        /* ====================================================
+           ALWAYS CLOSED WHEN PAGE STARTS
+        ==================================================== */
+
+        dropdown.classList.remove(
+            "profile-dropdown-open"
+        );
+
+
+        /* ====================================================
+           OPEN ONLY WHEN USER CLICKS
+        ==================================================== */
+
+        trigger.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+
+                event.stopPropagation();
+
+
+                /*
+                 * NEVER open the menu on the login page.
+                 */
+
+                if (
+                    !document.body.classList.contains(
+                        "authenticated"
+                    )
+                ) {
+
+                    dropdown.classList.remove(
+                        "profile-dropdown-open"
+                    );
+
+                    return;
+                }
+
+
+                dropdown.classList.toggle(
+                    "profile-dropdown-open"
+                );
+
+            }
+        );
+
+
+        /* ====================================================
+           DON'T CLOSE WHEN CLICKING INSIDE
+        ==================================================== */
+
+        dropdown.addEventListener(
+            "click",
+            function (event) {
+
+                event.stopPropagation();
+
+            }
+        );
+
+
+        /* ====================================================
+           CLICK OUTSIDE = CLOSE
+        ==================================================== */
+
+        document.addEventListener(
+            "click",
+            function (event) {
+
+                if (
+                    !trigger.contains(
+                        event.target
+                    ) &&
+                    !dropdown.contains(
+                        event.target
+                    )
+                ) {
+
+                    dropdown.classList.remove(
+                        "profile-dropdown-open"
+                    );
+
+                }
+
+            }
+        );
+
+
+        /* ====================================================
+           LOGOUT
+        ==================================================== */
+
+        if (logout) {
+
+            logout.addEventListener(
+                "click",
+                async function (event) {
+
+                    event.preventDefault();
+
+                    event.stopPropagation();
+
+
+                    logout.disabled =
+                        true;
+
+
+                    logout.innerHTML = `
+                        <span class="menu-icon">
+                            ◌
+                        </span>
+
+                        <span>
+                            Logging out...
+                        </span>
+                    `;
+
+
+                    try {
+
+                        const response =
+                            await fetch(
+                                "/api/auth/logout",
+                                {
+                                    method:
+                                        "POST",
+
+                                    credentials:
+                                        "include",
+
+                                    headers: {
+                                        "Accept":
+                                            "application/json"
+                                    }
+                                }
+                            );
+
+
+                        /*
+                         * CLOSE DROPDOWN
+                         */
+
+                        dropdown.classList.remove(
+                            "profile-dropdown-open"
+                        );
+
+
+                        /*
+                         * REMOVE AUTHENTICATED
+                         * STATE IMMEDIATELY
+                         */
+
+                        document.body.classList.remove(
+                            "authenticated"
+                        );
+
+
+                        /*
+                         * Go to login page.
+                         */
+
+                        window.location.replace(
+                            "/"
+                        );
+
+                        return;
+
+
+                    } catch (error) {
+
+                        console.error(
+                            "Logout error:",
+                            error
+                        );
+
+
+                        logout.disabled =
+                            false;
+
+
+                        logout.innerHTML = `
+                            <span class="menu-icon">
+                                ↪
+                            </span>
+
+                            <span>
+                                Logout
+                            </span>
+                        `;
+
+
+                        alert(
+                            "Unable to logout."
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+    }
+
+
+    /* ========================================================
+       START
+    ======================================================== */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            setupProfileMenu
+        );
+
+    } else {
+
+        setupProfileMenu();
+
+    }
+
+})();
+</script>
+</script>
+</script>
 </body>
 
 </html>

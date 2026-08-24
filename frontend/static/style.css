@@ -3926,3 +3926,1457 @@ footer {
     }
 
 }
+
+/* =========================================================
+   PROFILE DROPDOWN + LOGOUT
+   ADDITION ONLY — keeps the existing NeonSocial design
+========================================================= */
+
+.profile {
+    position: relative;
+}
+
+.profile-trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 0;
+    padding: 5px 8px;
+    border-radius: 12px;
+    background: transparent;
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    cursor: pointer;
+    transition: background .2s ease, transform .2s ease;
+}
+
+.profile-trigger:hover {
+    background: rgba(0,234,255,.06);
+}
+
+.profile-trigger:active {
+    transform: scale(.98);
+}
+
+.profile-arrow {
+    color: #68748f;
+    font-size: 12px;
+    transition: transform .2s ease;
+}
+
+
+.profile-dropdown {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    width: 270px;
+    padding: 14px;
+    border: 1px solid rgba(0,234,255,.20);
+    border-radius: 18px;
+    background: linear-gradient(145deg, rgba(11,18,40,.98), rgba(4,7,20,.98));
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: 0 25px 70px rgba(0,0,0,.55), 0 0 30px rgba(0,234,255,.08);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-8px) scale(.97);
+    transform-origin: top right;
+    transition: opacity .2s ease, visibility .2s ease, transform .2s ease;
+    z-index: 99999;
+}
+
+.profile.open .profile-dropdown {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+}
+
+.profile-dropdown-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 7px;
+}
+
+.profile-dropdown-avatar {
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #00a9c8, #6545d8);
+    box-shadow: 0 0 20px rgba(0,234,255,.20);
+}
+
+.profile-dropdown-name {
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.3;
+}
+
+.profile-dropdown-email {
+    margin-top: 4px;
+    max-width: 185px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #68748f;
+    font-size: 9px;
+}
+
+.profile-divider {
+    height: 1px;
+    margin: 9px 4px;
+    background: rgba(255,255,255,.06);
+}
+
+.profile-menu-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 0;
+    border-radius: 11px;
+    padding: 11px 10px;
+    background: transparent;
+    color: #c8d1e4;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 800;
+    text-align: left;
+    cursor: pointer;
+    transition: background .2s ease, color .2s ease, transform .2s ease;
+}
+
+.profile-menu-item:hover {
+    background: rgba(255,60,130,.08);
+    color: #ff5b9d;
+    transform: translateX(2px);
+}
+
+.menu-icon {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    background: rgba(255,60,130,.08);
+    color: #ff5b9d;
+    font-size: 15px;
+}
+
+.logout-item:disabled {
+    opacity: .55;
+    cursor: wait;
+    transform: none;
+}
+
+@media (max-width: 760px) {
+    .profile-dropdown {
+        right: -5px;
+        width: 250px;
+    }
+}
+/* ============================================================
+   NEONSOCIAL PROFILE DROPDOWN
+   LOGOUT MENU
+============================================================ */
+
+.profile {
+    position: relative !important;
+    display: flex;
+    align-items: center;
+    z-index: 9999 !important;
+}
+
+
+/* PROFILE BUTTON */
+
+.profile-trigger {
+    border: 0;
+    outline: none;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(12, 25, 55, 0.95),
+            rgba(19, 12, 50, 0.95)
+        );
+
+    color: #ffffff;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 7px 12px;
+
+    border-radius: 14px;
+
+    cursor: pointer;
+
+    font-family: inherit;
+
+    transition:
+        0.25s ease;
+
+    border:
+        1px solid rgba(
+            0,
+            238,
+            255,
+            0.12
+        );
+}
+
+
+.profile-trigger:hover {
+
+    border-color:
+        rgba(
+            0,
+            238,
+            255,
+            0.45
+        );
+
+    box-shadow:
+        0 0 25px
+        rgba(
+            0,
+            238,
+            255,
+            0.12
+        );
+
+    transform:
+        translateY(-1px);
+}
+
+
+/* ARROW */
+
+.profile-arrow {
+
+    color:
+        #8b9bbd;
+
+    font-size:
+        16px;
+
+    transition:
+        transform 0.25s ease;
+
+}
+
+
+.profile.open
+.profile-arrow {
+
+    transform:
+        rotate(180deg);
+
+    color:
+        #00f5ff;
+
+}
+
+
+/* ============================================================
+   DROPDOWN
+============================================================ */
+
+.profile-dropdown {
+
+    position: absolute;
+
+    top:
+        calc(100% + 12px);
+
+    right:
+        0;
+
+    width:
+        280px;
+
+    padding:
+        14px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(7, 14, 32, 0.98),
+            rgba(12, 8, 30, 0.98)
+        );
+
+    border:
+        1px solid
+        rgba(
+            0,
+            238,
+            255,
+            0.25
+        );
+
+    border-radius:
+        18px;
+
+    box-shadow:
+        0 20px 60px
+        rgba(0, 0, 0, 0.65),
+
+        0 0 35px
+        rgba(0, 238, 255, 0.10);
+
+    backdrop-filter:
+        blur(20px);
+
+    -webkit-backdrop-filter:
+        blur(20px);
+
+    z-index:
+        999999;
+
+    opacity:
+        0;
+
+    visibility:
+        hidden;
+
+    transform:
+        translateY(-8px)
+        scale(0.97);
+
+    transform-origin:
+        top right;
+
+    transition:
+        opacity 0.2s ease,
+        visibility 0.2s ease,
+        transform 0.2s ease;
+
+}
+
+
+/* SHOW DROPDOWN */
+
+.profile.open
+.profile-dropdown {
+
+    opacity:
+        1;
+
+    visibility:
+        visible;
+
+    transform:
+        translateY(0)
+        scale(1);
+
+}
+
+
+/* ============================================================
+   DROPDOWN HEADER
+============================================================ */
+
+.profile-dropdown-header {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        12px;
+
+    padding:
+        8px 6px 14px 6px;
+
+}
+
+
+.profile-dropdown-avatar {
+
+    width:
+        46px;
+
+    height:
+        46px;
+
+    min-width:
+        46px;
+
+    border-radius:
+        50%;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    font-weight:
+        800;
+
+    font-size:
+        14px;
+
+    color:
+        #06101c;
+
+    background:
+        linear-gradient(
+            135deg,
+            #00f5ff,
+            #00ffb7
+        );
+
+    box-shadow:
+        0 0 22px
+        rgba(
+            0,
+            245,
+            255,
+            0.35
+        );
+
+}
+
+
+.profile-dropdown-name {
+
+    color:
+        #ffffff;
+
+    font-size:
+        14px;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        0.4px;
+
+    margin-bottom:
+        4px;
+
+}
+
+
+.profile-dropdown-email {
+
+    color:
+        #7f8eae;
+
+    font-size:
+        11px;
+
+    max-width:
+        190px;
+
+    overflow:
+        hidden;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+
+}
+
+
+/* ============================================================
+   DIVIDER
+============================================================ */
+
+.profile-divider {
+
+    height:
+        1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(
+                0,
+                238,
+                255,
+                0.18
+            ),
+            transparent
+        );
+
+    margin:
+        2px 0 10px 0;
+
+}
+
+
+/* ============================================================
+   LOGOUT BUTTON
+============================================================ */
+
+.profile-menu-item {
+
+    width:
+        100%;
+
+    border:
+        0;
+
+    outline:
+        none;
+
+    background:
+        transparent;
+
+    color:
+        #b9c5df;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        12px;
+
+    padding:
+        12px;
+
+    border-radius:
+        12px;
+
+    cursor:
+        pointer;
+
+    font-family:
+        inherit;
+
+    font-size:
+        12px;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        1px;
+
+    text-align:
+        left;
+
+    transition:
+        0.2s ease;
+
+}
+
+
+.profile-menu-item:hover {
+
+    background:
+        rgba(
+            255,
+            45,
+            120,
+            0.10
+        );
+
+    color:
+        #ff4d91;
+
+}
+
+
+.logout-item {
+
+    border:
+        1px solid
+        transparent;
+
+}
+
+
+.logout-item:hover {
+
+    border-color:
+        rgba(
+            255,
+            45,
+            120,
+            0.18
+        );
+
+}
+
+
+.menu-icon {
+
+    width:
+        28px;
+
+    height:
+        28px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        8px;
+
+    background:
+        rgba(
+            255,
+            45,
+            120,
+            0.08
+        );
+
+    color:
+        #ff4d91;
+
+    font-size:
+        16px;
+
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 600px) {
+
+    .profile-dropdown {
+
+        width:
+            250px;
+
+        right:
+            -5px;
+
+    }
+
+}
+/* ============================================================
+   FINAL FIX — PROFILE DROPDOWN VISIBILITY
+============================================================ */
+
+.topbar,
+.top-actions {
+    overflow: visible !important;
+}
+
+.profile {
+    position: relative !important;
+    overflow: visible !important;
+    z-index: 999999 !important;
+}
+
+.profile-trigger {
+    position: relative !important;
+    z-index: 1000000 !important;
+    cursor: pointer !important;
+}
+
+/* FORCE DROPDOWN TO EXIST BUT HIDDEN */
+.profile .profile-dropdown {
+    display: block !important;
+
+    position: absolute !important;
+
+    top: calc(100% + 12px) !important;
+    right: 0 !important;
+
+    width: 280px !important;
+
+    min-height: 130px !important;
+
+    padding: 14px !important;
+
+    box-sizing: border-box !important;
+
+    background: #080d20 !important;
+
+    border: 1px solid rgba(0, 245, 255, 0.45) !important;
+
+    border-radius: 18px !important;
+
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.75),
+        0 0 35px rgba(0, 245, 255, 0.20) !important;
+
+    z-index: 9999999 !important;
+
+    opacity: 0 !important;
+
+    visibility: hidden !important;
+
+    pointer-events: none !important;
+
+    transform: translateY(-8px) scale(0.97) !important;
+
+    transition:
+        opacity 0.2s ease,
+        visibility 0.2s ease,
+        transform 0.2s ease !important;
+}
+
+
+/* ============================================================
+   WHEN PROFILE IS OPEN
+============================================================ */
+
+.profile.open .profile-dropdown {
+    display: block !important;
+
+    opacity: 1 !important;
+
+    visibility: visible !important;
+
+    pointer-events: auto !important;
+
+    transform:
+        translateY(0)
+        scale(1) !important;
+}
+
+
+/* ============================================================
+   DROPDOWN HEADER
+============================================================ */
+
+.profile-dropdown-header {
+    display: flex !important;
+
+    align-items: center !important;
+
+    gap: 12px !important;
+
+    padding: 8px 6px 14px 6px !important;
+}
+
+
+/* ============================================================
+   DROPDOWN AVATAR
+============================================================ */
+
+.profile-dropdown-avatar {
+    width: 46px !important;
+
+    height: 46px !important;
+
+    min-width: 46px !important;
+
+    border-radius: 50% !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    background:
+        linear-gradient(
+            135deg,
+            #00f5ff,
+            #00ffb7
+        ) !important;
+
+    color: #06101c !important;
+
+    font-weight: 800 !important;
+
+    font-size: 14px !important;
+
+    box-shadow:
+        0 0 22px
+        rgba(0, 245, 255, 0.35) !important;
+}
+
+
+/* ============================================================
+   NAME
+============================================================ */
+
+.profile-dropdown-name {
+    display: block !important;
+
+    color: #ffffff !important;
+
+    font-size: 14px !important;
+
+    font-weight: 700 !important;
+
+    margin-bottom: 4px !important;
+}
+
+
+/* ============================================================
+   EMAIL
+============================================================ */
+
+.profile-dropdown-email {
+    display: block !important;
+
+    color: #8190b2 !important;
+
+    font-size: 11px !important;
+
+    max-width: 190px !important;
+
+    overflow: hidden !important;
+
+    text-overflow: ellipsis !important;
+
+    white-space: nowrap !important;
+}
+
+
+/* ============================================================
+   DIVIDER
+============================================================ */
+
+.profile-divider {
+    display: block !important;
+
+    width: 100% !important;
+
+    height: 1px !important;
+
+    margin: 4px 0 10px 0 !important;
+
+    background:
+        rgba(0, 245, 255, 0.16) !important;
+}
+
+
+/* ============================================================
+   LOGOUT
+============================================================ */
+
+.profile-menu-item {
+    display: flex !important;
+
+    width: 100% !important;
+
+    align-items: center !important;
+
+    gap: 12px !important;
+
+    box-sizing: border-box !important;
+
+    border: 0 !important;
+
+    outline: none !important;
+
+    padding: 12px !important;
+
+    background: transparent !important;
+
+    color: #c5d0e8 !important;
+
+    cursor: pointer !important;
+
+    border-radius: 12px !important;
+
+    font-family: inherit !important;
+
+    font-size: 12px !important;
+
+    font-weight: 700 !important;
+
+    text-align: left !important;
+}
+
+
+.profile-menu-item:hover {
+    background:
+        rgba(255, 45, 120, 0.12) !important;
+
+    color:
+        #ff4f91 !important;
+}
+
+
+.menu-icon {
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    width: 28px !important;
+
+    height: 28px !important;
+
+    border-radius: 8px !important;
+
+    background:
+        rgba(255, 45, 120, 0.10) !important;
+
+    color:
+        #ff4f91 !important;
+
+    font-size: 16px !important;
+}
+
+
+/* ============================================================
+   ARROW
+============================================================ */
+
+.profile-arrow {
+    display: inline-block !important;
+
+    transition:
+        transform 0.2s ease !important;
+}
+
+
+.profile.open .profile-arrow {
+    transform:
+        rotate(180deg) !important;
+
+    color:
+        #00f5ff !important;
+}
+/* ============================================================
+   PROFILE BUTTON
+============================================================ */
+
+.profile-trigger {
+    display: flex !important;
+
+    align-items: center !important;
+
+    gap: 10px !important;
+
+    border: 0 !important;
+
+    outline: none !important;
+
+    background: transparent !important;
+
+    color: #ffffff !important;
+
+    cursor: pointer !important;
+
+    font-family: inherit !important;
+
+    padding: 6px 10px !important;
+
+    border-radius: 16px !important;
+
+    transition:
+        all 0.2s ease !important;
+}
+
+
+.profile-trigger:hover {
+    background:
+        rgba(0, 245, 255, 0.07) !important;
+}
+
+
+/* ============================================================
+   PROFILE CONTAINER
+============================================================ */
+
+.profile {
+    position: relative !important;
+
+    overflow: visible !important;
+
+    z-index: 999999 !important;
+}
+
+
+/* ============================================================
+   DROPDOWN
+============================================================ */
+
+.profile-dropdown {
+    position: absolute !important;
+
+    top: calc(100% + 12px) !important;
+
+    right: 0 !important;
+
+    width: 280px !important;
+
+    padding: 14px !important;
+
+    background:
+        rgba(7, 12, 30, 0.98) !important;
+
+    border:
+        1px solid
+        rgba(0, 245, 255, 0.45) !important;
+
+    border-radius: 18px !important;
+
+    box-shadow:
+        0 25px 70px
+        rgba(0, 0, 0, 0.8),
+        0 0 35px
+        rgba(0, 245, 255, 0.18) !important;
+
+    backdrop-filter:
+        blur(25px) !important;
+
+    z-index: 99999999 !important;
+
+    opacity: 0 !important;
+
+    visibility: hidden !important;
+
+    pointer-events: none !important;
+
+    transform:
+        translateY(-10px) !important;
+
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease,
+        visibility 0.2s ease !important;
+}
+
+
+/* ============================================================
+   OPEN DROPDOWN
+============================================================ */
+
+.profile.open .profile-dropdown {
+    opacity: 1 !important;
+
+    visibility: visible !important;
+
+    pointer-events: auto !important;
+
+    transform:
+        translateY(0) !important;
+}
+
+
+/* ============================================================
+   DROPDOWN CONTENT
+============================================================ */
+
+.profile-dropdown-header {
+    display: flex !important;
+
+    align-items: center !important;
+
+    gap: 12px !important;
+
+    padding: 8px !important;
+}
+
+
+.profile-dropdown-avatar {
+    width: 46px !important;
+
+    height: 46px !important;
+
+    min-width: 46px !important;
+
+    border-radius: 50% !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    background:
+        linear-gradient(
+            135deg,
+            #00f5ff,
+            #5b4dff
+        ) !important;
+
+    color: white !important;
+
+    font-weight: 800 !important;
+
+    font-size: 14px !important;
+
+    box-shadow:
+        0 0 25px
+        rgba(0, 245, 255, 0.3) !important;
+}
+
+
+.profile-dropdown-name {
+    color: white !important;
+
+    font-size: 14px !important;
+
+    font-weight: 700 !important;
+}
+
+
+.profile-dropdown-email {
+    margin-top: 4px !important;
+
+    color:
+        #8290ad !important;
+
+    font-size: 11px !important;
+
+    max-width: 190px !important;
+
+    overflow: hidden !important;
+
+    text-overflow: ellipsis !important;
+
+    white-space: nowrap !important;
+}
+
+
+.profile-divider {
+    height: 1px !important;
+
+    margin:
+        10px 4px !important;
+
+    background:
+        rgba(255,255,255,0.08) !important;
+}
+
+
+/* ============================================================
+   LOGOUT BUTTON
+============================================================ */
+
+.profile-menu-item {
+    display: flex !important;
+
+    align-items: center !important;
+
+    gap: 12px !important;
+
+    width: 100% !important;
+
+    padding: 12px !important;
+
+    border: none !important;
+
+    border-radius: 12px !important;
+
+    background: transparent !important;
+
+    color: #dce5ff !important;
+
+    cursor: pointer !important;
+
+    font-family: inherit !important;
+
+    font-size: 12px !important;
+
+    font-weight: 700 !important;
+
+    text-align: left !important;
+}
+
+
+.profile-menu-item:hover {
+    background:
+        rgba(255, 50, 130, 0.12) !important;
+
+    color:
+        #ff4f91 !important;
+}
+
+
+.menu-icon {
+    width: 30px !important;
+
+    height: 30px !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    border-radius: 9px !important;
+
+    background:
+        rgba(255, 50, 130, 0.1) !important;
+
+    color:
+        #ff4f91 !important;
+
+    font-size: 16px !important;
+}
+/* ============================================================
+   FINAL PROFILE DROPDOWN FIX
+============================================================ */
+
+#profileMenu {
+    position: relative !important;
+    z-index: 99999 !important;
+}
+
+#profileTrigger {
+    position: relative !important;
+    z-index: 100000 !important;
+    cursor: pointer !important;
+}
+
+#profileDropdown {
+    position: fixed !important;
+
+    top: 78px !important;
+    right: 25px !important;
+
+    width: 280px !important;
+    min-height: 130px !important;
+
+    background: #080d20 !important;
+
+    border: 1px solid rgba(0, 238, 255, 0.35) !important;
+
+    border-radius: 16px !important;
+
+    padding: 16px !important;
+
+    box-sizing: border-box !important;
+
+    z-index: 999999 !important;
+
+    display: none;
+
+    opacity: 1 !important;
+    visibility: visible !important;
+
+    pointer-events: auto !important;
+
+    transform: none !important;
+
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.65),
+        0 0 30px rgba(0, 238, 255, 0.12) !important;
+}
+
+
+/* DROPDOWN HEADER */
+
+.profile-dropdown-header {
+    display: flex !important;
+
+    align-items: center !important;
+
+    gap: 12px !important;
+
+    padding-bottom: 12px !important;
+}
+
+
+.profile-dropdown-avatar {
+    width: 42px !important;
+    height: 42px !important;
+
+    border-radius: 50% !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    background:
+        linear-gradient(
+            135deg,
+            #00eaff,
+            #6845ff
+        ) !important;
+
+    color: white !important;
+
+    font-weight: 800 !important;
+}
+
+
+.profile-dropdown-name {
+    color: white !important;
+
+    font-size: 15px !important;
+
+    font-weight: 700 !important;
+}
+
+
+.profile-dropdown-email {
+    color: #8490b5 !important;
+
+    font-size: 12px !important;
+
+    margin-top: 3px !important;
+}
+
+
+/* DIVIDER */
+
+.profile-divider {
+    width: 100% !important;
+
+    height: 1px !important;
+
+    background:
+        rgba(255,255,255,0.08) !important;
+
+    margin: 5px 0 10px 0 !important;
+}
+
+
+/* LOGOUT BUTTON */
+
+#logoutBtn {
+    width: 100% !important;
+
+    min-height: 45px !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    gap: 12px !important;
+
+    padding: 11px 13px !important;
+
+    border: 1px solid rgba(255, 60, 150, 0.18) !important;
+
+    border-radius: 10px !important;
+
+    background:
+        rgba(255, 30, 130, 0.06) !important;
+
+    color: #ff5ca8 !important;
+
+    cursor: pointer !important;
+
+    font-size: 14px !important;
+
+    font-weight: 700 !important;
+
+    text-align: left !important;
+
+    opacity: 1 !important;
+
+    visibility: visible !important;
+
+    pointer-events: auto !important;
+}
+
+
+#logoutBtn:hover {
+    background:
+        rgba(255, 30, 130, 0.14) !important;
+
+    border-color:
+        rgba(255, 60, 150, 0.45) !important;
+}
+
+
+#logoutBtn .menu-icon {
+    font-size: 18px !important;
+
+    color: #ff35a8 !important;
+}
+
+
+/* ARROW */
+
+.profile-arrow {
+    cursor: pointer !important;
+}
+/* ============================================================
+   FINAL AUTHENTICATION VISIBILITY FIX
+============================================================ */
+
+/*
+   The application must be hidden while the user is
+   on the login page.
+*/
+
+.app-shell {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+
+/*
+   Show the application ONLY after successful login.
+*/
+
+body.authenticated .app-shell {
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+
+/*
+   Login page must always be above the application.
+*/
+
+#loginPage {
+    position: fixed !important;
+
+    inset: 0 !important;
+
+    z-index: 999999 !important;
+}
+
+
+/*
+   When authenticated, hide login page completely.
+*/
+
+body.authenticated #loginPage {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+
+/*
+   Profile dropdown is ALWAYS hidden initially.
+*/
+
+#profileDropdown {
+    display: none !important;
+}
+
+
+/*
+   JavaScript will add this class when the user
+   actually clicks the profile button.
+*/
+
+#profileDropdown.profile-dropdown-open {
+    display: block !important;
+}

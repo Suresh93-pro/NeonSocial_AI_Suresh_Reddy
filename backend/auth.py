@@ -435,13 +435,38 @@ def get_current_user():
 
 def login_user(user):
 
+    # Completely reset the previous browser session.
+    # This is important because another user may have used
+    # this browser before.
+
     session.clear()
 
+    # NeonSocial user identity
     session["user_id"] = user["id"]
 
-    session["user_name"] = user["name"]
-
     session["user_email"] = user["email"]
+
+    if user.get("name"):
+        session["user_name"] = user["name"]
+
+    # IMPORTANT:
+    # Never carry another user's LinkedIn connection
+    # into this user's session.
+
+    session.pop(
+        "linkedin_access_token",
+        None
+    )
+
+    session.pop(
+        "linkedin_token_data",
+        None
+    )
+
+    session.pop(
+        "linkedin_profile",
+        None
+    )
 
     session.permanent = True
 

@@ -1529,6 +1529,222 @@ async function startup() {
 }
 
 startup();
+// ============================================================
+// PROFILE MENU + LOGOUT
+// ============================================================
+
+(function initProfileMenu() {
+
+    const profileMenu =
+        document.getElementById("profileMenu");
+
+    const profileTrigger =
+        document.getElementById("profileTrigger");
+
+    const profileDropdown =
+        document.getElementById("profileDropdown");
+
+    const logoutButton =
+        document.getElementById("logoutButton");
+
+    if (!profileMenu || !profileTrigger || !profileDropdown) {
+
+        console.warn(
+            "NeonSocial profile menu elements not found."
+        );
+
+        return;
+    }
+
+
+    // ========================================================
+    // OPEN / CLOSE PROFILE DROPDOWN
+    // ========================================================
+
+    profileTrigger.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            profileDropdown.classList.toggle(
+                "show"
+            );
+
+        }
+    );
+
+
+    // ========================================================
+    // CLICK OUTSIDE = CLOSE DROPDOWN
+    // ========================================================
+
+    document.addEventListener(
+        "click",
+        function (event) {
+
+            if (
+                !profileMenu.contains(
+                    event.target
+                )
+            ) {
+
+                profileDropdown.classList.remove(
+                    "show"
+                );
+
+            }
+
+        }
+    );
+
+
+    // ========================================================
+    // ESC KEY = CLOSE DROPDOWN
+    // ========================================================
+
+    document.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (event.key === "Escape") {
+
+                profileDropdown.classList.remove(
+                    "show"
+                );
+
+            }
+
+        }
+    );
+
+
+    // ========================================================
+    // LOGOUT
+    // ========================================================
+
+    if (logoutButton) {
+
+        logoutButton.addEventListener(
+            "click",
+            async function (event) {
+
+                event.preventDefault();
+
+                logoutButton.disabled = true;
+
+                logoutButton.innerHTML = `
+                    <span class="menu-icon">◌</span>
+                    <span>Logging out...</span>
+                `;
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            "/api/auth/logout",
+                            {
+                                method: "POST",
+
+                                credentials:
+                                    "include",
+
+                                headers: {
+                                    "Accept":
+                                        "application/json"
+                                }
+                            }
+                        );
+
+
+                    let data = {};
+
+                    try {
+
+                        data =
+                            await response.json();
+
+                    } catch {
+
+                        data = {};
+
+                    }
+
+
+                    if (
+                        response.ok &&
+                        data.success !== false
+                    ) {
+
+                        /*
+                         * Clear the frontend state.
+                         */
+
+                        currentSession =
+                            null;
+
+                        generatedContent =
+                            "";
+
+
+                        /*
+                         * Close dropdown.
+                         */
+
+                        profileDropdown.classList.remove(
+                            "show"
+                        );
+
+
+                        /*
+                         * Return to login page.
+                         */
+
+                        window.location.href =
+                            "/";
+
+                        return;
+
+                    }
+
+
+                    throw new Error(
+                        data.error ||
+                        "Logout failed."
+                    );
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Logout error:",
+                        error
+                    );
+
+                    alert(
+                        error.message ||
+                        "Unable to logout."
+                    );
+
+
+                    logoutButton.disabled =
+                        false;
+
+                    logoutButton.innerHTML = `
+                        <span class="menu-icon">↪</span>
+                        <span>Logout</span>
+                    `;
+
+                }
+
+            }
+        );
+
+    }
+
+})();
 /* ============================================================
    NEONSOCIAL LOGIN SYSTEM
    REAL BACKEND AUTHENTICATION
@@ -1571,49 +1787,136 @@ startup();
 
     async function checkAuthentication() {
 
-        try {
+    try {
 
-            const response = await fetch(
+        const response =
+            await fetch(
                 "/api/auth/me",
                 {
                     method: "GET",
-                    credentials: "include",
+
+                    credentials:
+                        "include",
+
                     headers: {
-                        "Accept": "application/json"
+                        "Accept":
+                            "application/json"
                     }
                 }
             );
 
-            if (!response.ok) {
-                return;
-            }
 
-            const data =
-                await response.json();
+        if (!response.ok) {
 
-            if (
-                data.success === true &&
-                data.authenticated === true
-            ) {
-
-                loginPage.classList.add(
-                    "hidden"
-                );
-
-                document.body.classList.add(
-                    "authenticated"
-                );
-            }
-
-        } catch (error) {
-
-            console.warn(
-                "Authentication check failed:",
-                error
+            document.body.classList.remove(
+                "authenticated"
             );
-        }
-    }
 
+            loginPage.classList.remove(
+                "hidden"
+            );
+
+            return;
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            data.success === true &&
+            data.authenticated === true
+        ) {
+
+            /*
+             * USER IS LOGGED IN
+             */
+
+            document.body.classList.add(
+                "authenticated"
+            );
+
+            loginPage.classList.add(
+                "hidden"
+            );
+
+
+            /*
+             * Make absolutely sure
+             * profile dropdown is closed.
+             */
+
+            const dropdown =
+                document.getElementById(
+                    "profileDropdown"
+                );
+
+            if (dropdown) {
+
+                dropdown.classList.remove(
+                    "profile-dropdown-open"
+                );
+
+            }
+
+        } else {
+
+            /*
+             * USER IS LOGGED OUT
+             */
+
+            document.body.classList.remove(
+                "authenticated"
+            );
+
+            loginPage.classList.remove(
+                "hidden"
+            );
+
+
+            /*
+             * Close profile dropdown.
+             */
+
+            const dropdown =
+                document.getElementById(
+                    "profileDropdown"
+                );
+
+            if (dropdown) {
+
+                dropdown.classList.remove(
+                    "profile-dropdown-open"
+                );
+
+            }
+
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "Authentication check failed:",
+            error
+        );
+
+
+        /*
+         * If authentication cannot be verified,
+         * show login screen.
+         */
+
+        document.body.classList.remove(
+            "authenticated"
+        );
+
+        loginPage.classList.remove(
+            "hidden"
+        );
+
+    }
+}
 
     /* ========================================================
        LOGIN
@@ -1876,5 +2179,951 @@ startup();
        ======================================================== */
 
     checkAuthentication();
+
+})();
+/* ============================================================
+   NEONSOCIAL PROFILE DROPDOWN
+   LOGOUT SYSTEM
+   ADDITION ONLY
+============================================================ */
+
+(function initProfileDropdown() {
+
+    const profile =
+        document.querySelector(".profile");
+
+    if (!profile) {
+        return;
+    }
+
+
+    /* ========================================================
+       GET EXISTING PROFILE ELEMENTS
+    ======================================================== */
+
+    const avatar =
+        profile.querySelector(".profile-avatar");
+
+    const nameElement =
+        profile.querySelector("span");
+
+
+    /* ========================================================
+       CREATE PROFILE BUTTON
+       WITHOUT CHANGING EXISTING HTML
+    ======================================================== */
+
+    const profileTrigger =
+        document.createElement("button");
+
+    profileTrigger.type =
+        "button";
+
+    profileTrigger.className =
+        "profile-trigger";
+
+
+    /* Move existing profile content into trigger */
+
+    if (avatar) {
+
+        profile.removeChild(avatar);
+
+        profileTrigger.appendChild(
+            avatar
+        );
+    }
+
+
+    if (nameElement) {
+
+        profile.removeChild(nameElement);
+
+        profileTrigger.appendChild(
+            nameElement
+        );
+    }
+
+
+    const arrow =
+        document.createElement("span");
+
+    arrow.className =
+        "profile-arrow";
+
+    arrow.textContent =
+        "⌄";
+
+    profileTrigger.appendChild(
+        arrow
+    );
+
+
+    profile.appendChild(
+        profileTrigger
+    );
+
+
+    /* ========================================================
+       CREATE DROPDOWN
+    ======================================================== */
+
+    const dropdown =
+        document.createElement("div");
+
+    dropdown.className =
+        "profile-dropdown";
+
+
+    dropdown.innerHTML = `
+
+        <div class="profile-dropdown-header">
+
+            <div
+                class="profile-dropdown-avatar"
+                id="profileDropdownAvatar"
+            >
+                SR
+            </div>
+
+            <div>
+
+                <div
+                    class="profile-dropdown-name"
+                    id="profileDropdownName"
+                >
+                    Suresh
+                </div>
+
+                <div
+                    class="profile-dropdown-email"
+                    id="profileDropdownEmail"
+                >
+                    Loading...
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="profile-divider"></div>
+
+
+        <button
+            type="button"
+            class="profile-menu-item logout-item"
+            id="logoutButton"
+        >
+
+            <span class="menu-icon">
+                ⇥
+            </span>
+
+            <span>
+                LOGOUT
+            </span>
+
+        </button>
+
+    `;
+
+
+    profile.appendChild(
+        dropdown
+    );
+
+
+    /* ========================================================
+       TOGGLE DROPDOWN
+    ======================================================== */
+
+    profileTrigger.addEventListener(
+        "click",
+        function(event) {
+
+            event.stopPropagation();
+
+            profile.classList.toggle(
+                "open"
+            );
+
+        }
+    );
+
+
+    /* ========================================================
+       CLOSE WHEN CLICKING OUTSIDE
+    ======================================================== */
+
+    document.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                !profile.contains(
+                    event.target
+                )
+            ) {
+
+                profile.classList.remove(
+                    "open"
+                );
+
+            }
+
+        }
+    );
+
+
+    /* ========================================================
+       ESC KEY
+    ======================================================== */
+
+    document.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.key === "Escape"
+            ) {
+
+                profile.classList.remove(
+                    "open"
+                );
+
+            }
+
+        }
+    );
+
+
+    /* ========================================================
+       LOAD CURRENT USER
+    ======================================================== */
+
+    async function loadCurrentUser() {
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/auth/me",
+                    {
+                        method: "GET",
+
+                        credentials:
+                            "include",
+
+                        headers: {
+                            "Accept":
+                                "application/json"
+                        }
+                    }
+                );
+
+
+            if (!response.ok) {
+                return;
+            }
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                data.success === true &&
+                data.authenticated === true &&
+                data.user
+            ) {
+
+                const user =
+                    data.user;
+
+
+                const userName =
+                    user.name ||
+                    "Suresh";
+
+
+                const userEmail =
+                    user.email ||
+                    "";
+
+
+                /* ----------------------------------------
+                   TOP PROFILE NAME
+                ---------------------------------------- */
+
+                if (nameElement) {
+
+                    nameElement.textContent =
+                        userName;
+
+                }
+
+
+                /* ----------------------------------------
+                   PROFILE DROPDOWN NAME
+                ---------------------------------------- */
+
+                const dropdownName =
+                    document.getElementById(
+                        "profileDropdownName"
+                    );
+
+                if (dropdownName) {
+
+                    dropdownName.textContent =
+                        userName;
+
+                }
+
+
+                /* ----------------------------------------
+                   PROFILE EMAIL
+                ---------------------------------------- */
+
+                const dropdownEmail =
+                    document.getElementById(
+                        "profileDropdownEmail"
+                    );
+
+                if (dropdownEmail) {
+
+                    dropdownEmail.textContent =
+                        userEmail;
+
+                }
+
+
+                /* ----------------------------------------
+                   INITIALS
+                ---------------------------------------- */
+
+                const initials =
+                    getInitials(
+                        userName
+                    );
+
+
+                if (avatar) {
+
+                    avatar.textContent =
+                        initials;
+
+                }
+
+
+                const dropdownAvatar =
+                    document.getElementById(
+                        "profileDropdownAvatar"
+                    );
+
+                if (dropdownAvatar) {
+
+                    dropdownAvatar.textContent =
+                        initials;
+
+                }
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "Unable to load current user:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* ========================================================
+       GET INITIALS
+    ======================================================== */
+
+    function getInitials(
+        name
+    ) {
+
+        if (!name) {
+
+            return "SR";
+
+        }
+
+
+        const parts =
+            name
+                .trim()
+                .split(/\s+/);
+
+
+        if (parts.length === 1) {
+
+            return parts[0]
+                .substring(0, 2)
+                .toUpperCase();
+
+        }
+
+
+        return (
+            parts[0][0] +
+            parts[parts.length - 1][0]
+        ).toUpperCase();
+
+    }
+
+
+    /* ========================================================
+       LOGOUT
+    ======================================================== */
+
+    const logoutButton =
+        document.getElementById(
+            "logoutButton"
+        );
+
+
+    if (logoutButton) {
+
+        logoutButton.addEventListener(
+            "click",
+            async function(event) {
+
+                event.preventDefault();
+
+                event.stopPropagation();
+
+
+                /* ----------------------------------------
+                   LOADING STATE
+                ---------------------------------------- */
+
+                const originalHTML =
+                    logoutButton.innerHTML;
+
+
+                logoutButton.disabled =
+                    true;
+
+
+                logoutButton.innerHTML = `
+                    <span class="menu-icon">
+                        ◌
+                    </span>
+
+                    <span>
+                        LOGGING OUT...
+                    </span>
+                `;
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            "/api/auth/logout",
+                            {
+                                method: "POST",
+
+                                credentials:
+                                    "include",
+
+                                headers: {
+                                    "Accept":
+                                        "application/json",
+
+                                    "Content-Type":
+                                        "application/json"
+                                }
+                            }
+                        );
+
+
+                    let data = {};
+
+                    try {
+
+                        data =
+                            await response.json();
+
+                    } catch {
+
+                        data = {};
+
+                    }
+
+
+                    /* ------------------------------------
+                       SUCCESS
+                    ------------------------------------ */
+
+                    if (
+                        response.ok &&
+                        data.success === true
+                    ) {
+
+                        profile.classList.remove(
+                            "open"
+                        );
+
+
+                        /*
+                         * Go back to login page.
+                         */
+
+                        window.location.href =
+                            "/login";
+
+
+                        return;
+
+                    }
+
+
+                    /* ------------------------------------
+                       SERVER ERROR
+                    ------------------------------------ */
+
+                    alert(
+                        data.error ||
+                        "Logout failed. Please try again."
+                    );
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Logout error:",
+                        error
+                    );
+
+
+                    alert(
+                        "Unable to connect to NeonSocial AI server."
+                    );
+
+
+                } finally {
+
+                    logoutButton.disabled =
+                        false;
+
+                    logoutButton.innerHTML =
+                        originalHTML;
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       INITIAL LOAD
+    ======================================================== */
+
+    loadCurrentUser();
+
+})();
+/* ============================================================
+   PROFILE DROPDOWN + LOGOUT
+============================================================ */
+
+(function initProfileMenu() {
+
+    const profileMenu =
+        document.getElementById(
+            "profileMenu"
+        );
+
+    const profileTrigger =
+        document.getElementById(
+            "profileTrigger"
+        );
+
+    const profileDropdown =
+        document.getElementById(
+            "profileDropdown"
+        );
+
+    const logoutButton =
+        document.getElementById(
+            "logoutButton"
+        );
+
+    const profileName =
+        document.getElementById(
+            "profileName"
+        );
+
+    const profileAvatar =
+        document.getElementById(
+            "profileAvatar"
+        );
+
+    const dropdownName =
+        document.getElementById(
+            "dropdownName"
+        );
+
+    const dropdownEmail =
+        document.getElementById(
+            "dropdownEmail"
+        );
+
+    const dropdownAvatar =
+        document.getElementById(
+            "dropdownAvatar"
+        );
+
+
+    /*
+     * STOP IF PROFILE DOES NOT EXIST
+     */
+
+    if (
+        !profileMenu ||
+        !profileTrigger ||
+        !profileDropdown
+    ) {
+
+        console.warn(
+            "NeonSocial: Profile menu elements not found."
+        );
+
+        return;
+    }
+
+
+    /* ========================================================
+       OPEN / CLOSE PROFILE
+    ======================================================== */
+
+    profileTrigger.addEventListener(
+        "click",
+        function(event) {
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+            profileMenu.classList.toggle(
+                "open"
+            );
+
+        }
+    );
+
+
+    /* ========================================================
+       CLOSE WHEN CLICKING OUTSIDE
+    ======================================================== */
+
+    document.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                !profileMenu.contains(
+                    event.target
+                )
+            ) {
+
+                profileMenu.classList.remove(
+                    "open"
+                );
+
+            }
+
+        }
+    );
+
+
+    /* ========================================================
+       LOAD CURRENT USER
+    ======================================================== */
+
+    async function loadProfileUser() {
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/auth/me",
+                    {
+                        method: "GET",
+
+                        credentials:
+                            "include",
+
+                        headers: {
+                            "Accept":
+                                "application/json"
+                        }
+                    }
+                );
+
+
+            if (!response.ok) {
+
+                return;
+            }
+
+
+            const data =
+                await response.json();
+
+
+            console.log(
+                "NeonSocial auth user:",
+                data
+            );
+
+
+            if (
+                data.success === true &&
+                data.authenticated === true
+            ) {
+
+                const user =
+                    data.user || {};
+
+
+                const name =
+                    user.name ||
+                    user.full_name ||
+                    user.username ||
+                    "User";
+
+
+                const email =
+                    user.email ||
+                    "";
+
+
+                /*
+                 * INITIALS
+                 */
+
+                const initials =
+                    name
+                        .trim()
+                        .split(/\s+/)
+                        .map(
+                            part =>
+                                part
+                                    .charAt(0)
+                                    .toUpperCase()
+                        )
+                        .slice(0, 2)
+                        .join("");
+
+
+                /*
+                 * TOP PROFILE
+                 */
+
+                if (profileName) {
+
+                    profileName.textContent =
+                        name;
+
+                }
+
+
+                if (profileAvatar) {
+
+                    profileAvatar.textContent =
+                        initials || "U";
+
+                }
+
+
+                /*
+                 * DROPDOWN PROFILE
+                 */
+
+                if (dropdownName) {
+
+                    dropdownName.textContent =
+                        name;
+
+                }
+
+
+                if (dropdownEmail) {
+
+                    dropdownEmail.textContent =
+                        email || "Authenticated user";
+
+                }
+
+
+                if (dropdownAvatar) {
+
+                    dropdownAvatar.textContent =
+                        initials || "U";
+
+                }
+
+            }
+
+        }
+        catch (error) {
+
+            console.error(
+                "Profile loading error:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* ========================================================
+       LOGOUT
+    ======================================================== */
+
+    if (logoutButton) {
+
+        logoutButton.addEventListener(
+            "click",
+            async function(event) {
+
+                event.preventDefault();
+
+                event.stopPropagation();
+
+
+                const originalHTML =
+                    logoutButton.innerHTML;
+
+
+                logoutButton.disabled =
+                    true;
+
+
+                logoutButton.innerHTML =
+                    `
+                    <span class="menu-icon">
+                        ◌
+                    </span>
+
+                    <span>
+                        LOGGING OUT...
+                    </span>
+                    `;
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            "/api/auth/logout",
+                            {
+                                method: "POST",
+
+                                credentials:
+                                    "include",
+
+                                headers: {
+                                    "Accept":
+                                        "application/json"
+                                }
+                            }
+                        );
+
+
+                    let data = {};
+
+                    try {
+
+                        data =
+                            await response.json();
+
+                    }
+                    catch {
+
+                        data = {};
+
+                    }
+
+
+                    if (
+                        response.ok &&
+                        (
+                            data.success === true ||
+                            response.status === 200
+                        )
+                    ) {
+
+                        /*
+                         * CLOSE MENU
+                         */
+
+                        profileMenu.classList.remove(
+                            "open"
+                        );
+
+
+                        /*
+                         * GO TO LOGIN
+                         */
+
+                        window.location.href =
+                            "/";
+
+                        return;
+                    }
+
+
+                    throw new Error(
+                        data.error ||
+                        "Logout failed."
+                    );
+
+                }
+                catch (error) {
+
+                    console.error(
+                        "Logout error:",
+                        error
+                    );
+
+
+                    alert(
+                        error.message ||
+                        "Unable to logout."
+                    );
+
+
+                    logoutButton.disabled =
+                        false;
+
+                    logoutButton.innerHTML =
+                        originalHTML;
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       LOAD USER
+    ======================================================== */
+
+    loadProfileUser();
 
 })();
