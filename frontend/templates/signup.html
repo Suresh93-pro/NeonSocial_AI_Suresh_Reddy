@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>NeonSocial — Create Account</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+
+    margin: 0;
+
+    padding: 0;
+
+    width: 100%;
+
+    min-height: 100%;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+}
+
+body {
+
+    min-height: 100vh;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background:
+        radial-gradient(
+            circle at 50% 30%,
+            #162a63 0%,
+            #080b1a 45%,
+            #02030a 100%
+        );
+
+    color: white;
+
+}
+
+.card {
+
+    width: min(
+        92%,
+        430px
+    );
+
+    padding: 42px;
+
+    border-radius: 28px;
+
+    background:
+        rgba(
+            9,
+            17,
+            42,
+            .85
+        );
+
+    border:
+        1px solid
+        rgba(
+            0,
+            245,
+            255,
+            .45
+        );
+
+    box-shadow:
+        0 0 40px
+        rgba(
+            0,
+            245,
+            255,
+            .15
+        ),
+        0 0 100px
+        rgba(
+            120,
+            70,
+            255,
+            .12
+        );
+
+    backdrop-filter:
+        blur(25px);
+
+}
+
+.logo {
+
+    text-align: center;
+
+    font-size: 30px;
+
+    font-weight: bold;
+
+    color: #00f5ff;
+
+    margin-bottom: 8px;
+
+}
+
+.subtitle {
+
+    text-align: center;
+
+    color: #9da9cc;
+
+    margin-bottom: 30px;
+
+}
+
+label {
+
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #cbd5ff;
+
+}
+
+input {
+
+    width: 100%;
+
+    padding: 14px;
+
+    margin-bottom: 20px;
+
+    border-radius: 12px;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .12
+        );
+
+    background:
+        rgba(
+            0,
+            0,
+            0,
+            .25
+        );
+
+    color: white;
+
+    outline: none;
+
+}
+
+button {
+
+    width: 100%;
+
+    padding: 14px;
+
+    border: none;
+
+    border-radius: 12px;
+
+    cursor: pointer;
+
+    font-size: 16px;
+
+    font-weight: bold;
+
+    color: #00151b;
+
+    background:
+        linear-gradient(
+            135deg,
+            #00f5ff,
+            #00ff9d
+        );
+
+}
+
+.message {
+
+    margin-top: 18px;
+
+    text-align: center;
+
+    color: #ff6b9d;
+
+}
+
+.login {
+
+    margin-top: 25px;
+
+    text-align: center;
+
+    color: #9da9cc;
+
+}
+
+.login a {
+
+    color: #00f5ff;
+
+    text-decoration: none;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<div class="logo">
+NEONSOCIAL AI
+</div>
+
+<div class="subtitle">
+Create your account
+</div>
+
+<form id="signupForm">
+
+<label>
+Email
+</label>
+
+<input
+    id="email"
+    type="email"
+    placeholder="Enter your email"
+    required
+>
+
+<label>
+Password
+</label>
+
+<input
+    id="password"
+    type="password"
+    placeholder="Minimum 8 characters"
+    required
+>
+
+<label>
+Confirm Password
+</label>
+
+<input
+    id="confirmPassword"
+    type="password"
+    placeholder="Confirm your password"
+    required
+>
+
+<button type="submit">
+CREATE ACCOUNT
+</button>
+
+</form>
+
+<div
+    id="message"
+    class="message"
+></div>
+
+<div class="login">
+
+Already have an account?
+
+<a href="/login">
+Login
+</a>
+
+</div>
+
+</div>
+
+<script>
+
+const form =
+    document.getElementById(
+        "signupForm"
+    );
+
+const message =
+    document.getElementById(
+        "message"
+    );
+
+form.addEventListener(
+    "submit",
+    async function(event) {
+
+        event.preventDefault();
+
+        const email =
+            document.getElementById(
+                "email"
+            ).value;
+
+        const password =
+            document.getElementById(
+                "password"
+            ).value;
+
+        const confirmPassword =
+            document.getElementById(
+                "confirmPassword"
+            ).value;
+
+        if (
+            password !==
+            confirmPassword
+        ) {
+
+            message.textContent =
+                "Passwords do not match.";
+
+            return;
+
+        }
+
+        if (password.length < 8) {
+
+            message.textContent =
+                "Password must contain at least 8 characters.";
+
+            return;
+
+        }
+
+        message.textContent =
+            "Creating account...";
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/auth/register",
+                    {
+
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+
+                            email:
+                                email,
+
+                            password:
+                                password
+
+                        })
+
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            if (!data.success) {
+
+                message.textContent =
+                    data.error ||
+                    "Unable to create account.";
+
+                return;
+
+            }
+
+            window.location.href =
+                "/";
+
+        }
+        catch(error) {
+
+            message.textContent =
+                "Unable to connect to server.";
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+
+</html>

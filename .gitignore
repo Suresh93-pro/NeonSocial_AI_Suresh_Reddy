@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+neonsocial_users.db
+linkedin_connection.json
