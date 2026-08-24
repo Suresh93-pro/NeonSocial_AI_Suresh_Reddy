@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html>
 
@@ -221,6 +222,14 @@ button:hover {
 
 }
 
+button:disabled {
+
+    opacity: .7;
+
+    cursor: wait;
+
+}
+
 .message {
 
     margin-top: 18px;
@@ -246,6 +255,12 @@ button:hover {
     color: #00f5ff;
 
     text-decoration: none;
+
+}
+
+.signup a:hover {
+
+    text-decoration: underline;
 
 }
 
@@ -275,6 +290,7 @@ Email
     id="email"
     type="email"
     placeholder="Enter your email"
+    autocomplete="email"
     required
 >
 
@@ -286,10 +302,14 @@ Password
     id="password"
     type="password"
     placeholder="Enter your password"
+    autocomplete="current-password"
     required
 >
 
-<button type="submit">
+<button
+    id="loginButton"
+    type="submit"
+>
 LOGIN
 </button>
 
@@ -324,6 +344,16 @@ const message =
         "message"
     );
 
+const loginButton =
+    document.getElementById(
+        "loginButton"
+    );
+
+
+/* ============================================================
+   LOGIN
+   ============================================================ */
+
 form.addEventListener(
     "submit",
     async function(event) {
@@ -333,15 +363,47 @@ form.addEventListener(
         message.textContent =
             "Logging in...";
 
+        loginButton.disabled =
+            true;
+
         const email =
             document.getElementById(
                 "email"
-            ).value;
+            ).value.trim();
 
         const password =
             document.getElementById(
                 "password"
             ).value;
+
+
+        /* ====================================================
+           VALIDATION
+           ==================================================== */
+
+        if (!email) {
+
+            message.textContent =
+                "Please enter your email.";
+
+            loginButton.disabled =
+                false;
+
+            return;
+        }
+
+
+        if (!password) {
+
+            message.textContent =
+                "Please enter your password.";
+
+            loginButton.disabled =
+                false;
+
+            return;
+        }
+
 
         try {
 
@@ -351,48 +413,167 @@ form.addEventListener(
                     {
 
                         method: "POST",
+
                         credentials: "include",
 
-
                         headers: {
+
                             "Content-Type":
+                                "application/json",
+
+                            "Accept":
                                 "application/json"
+
                         },
 
-                        body: JSON.stringify({
+                        body:
+                            JSON.stringify({
 
-                            email:
-                                email,
+                                email:
+                                    email,
 
-                            password:
-                                password
+                                password:
+                                    password
 
-                        })
+                            })
 
                     }
                 );
 
-            const data =
-                await response.json();
 
-            if (!data.success) {
+            let data = {};
+
+            try {
+
+                data =
+                    await response.json();
+
+            }
+            catch (
+                jsonError
+            ) {
+
+                data = {};
+
+            }
+
+
+            /* =================================================
+               LOGIN SUCCESS
+               ================================================= */
+
+            if (
+                response.ok &&
+                data.success === true
+            ) {
 
                 message.textContent =
-                    data.error ||
-                    "Login failed.";
+                    "Login successful.";
+
+                
+                /*
+                 * Save the actual logged-in user's
+                 * information returned by the backend.
+                 *
+                 * This is NOT hardcoded to Suresh.
+                 */
+
+                if (
+                    data.user &&
+                    typeof data.user === "object"
+                ) {
+
+                    if (
+                        data.user.name
+                    ) {
+
+                        localStorage.setItem(
+                            "neonsocial_user_name",
+                            data.user.name
+                        );
+
+                    }
+                    else if (
+                        data.user.email
+                    ) {
+
+                        localStorage.setItem(
+                            "neonsocial_user_name",
+                            data.user.email
+                        );
+
+                    }
+
+
+                    if (
+                        data.user.email
+                    ) {
+
+                        localStorage.setItem(
+                            "neonsocial_user_email",
+                            data.user.email
+                        );
+
+                    }
+
+                }
+                else {
+
+                    /*
+                     * Fallback.
+                     * If backend doesn't return a name,
+                     * use the login email.
+                     */
+
+                    localStorage.setItem(
+                        "neonsocial_user_name",
+                        email
+                    );
+
+                    localStorage.setItem(
+                        "neonsocial_user_email",
+                        email
+                    );
+
+                }
+
+
+                /*
+                 * Go to the main NeonSocial dashboard.
+                 */
+
+                window.location.href =
+                    "/";
 
                 return;
 
             }
 
-            window.location.href =
-                "/";
+
+            /* =================================================
+               LOGIN FAILED
+               ================================================= */
+
+            message.textContent =
+                data.error ||
+                "Invalid email or password.";
+
+            loginButton.disabled =
+                false;
 
         }
         catch(error) {
 
+            console.error(
+                "Login error:",
+                error
+            );
+
             message.textContent =
                 "Unable to connect to server.";
+
+            loginButton.disabled =
+                false;
 
         }
 
@@ -404,3 +585,4 @@ form.addEventListener(
 </body>
 
 </html>
+```

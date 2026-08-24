@@ -1298,6 +1298,166 @@ $("#linkedinBtn")
         }
     );
 
+// ============================================================
+// LINKEDIN CONNECTION STATUS
+// ============================================================
+
+async function checkLinkedInStatus() {
+
+    const status =
+        document.getElementById(
+            "linkedinStatus"
+        );
+
+    const button =
+        document.getElementById(
+            "linkedinBtn"
+        );
+
+    const profileName =
+        document.getElementById(
+            "linkedinProfileName"
+        );
+
+    if (!status) {
+        return;
+    }
+
+    try {
+
+        status.textContent =
+            "Checking...";
+
+
+        const response =
+            await fetch(
+                "/api/linkedin/status",
+                {
+                    method: "GET",
+
+                    credentials:
+                        "include",
+
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                }
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "LinkedIn status request failed."
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            data.success === true &&
+            data.connected === true
+        ) {
+
+            status.textContent =
+                "CONNECTED ✓";
+
+
+            if (button) {
+
+                button.textContent =
+                    "CONNECTED ✓";
+
+                button.disabled =
+                    true;
+
+                button.style.cursor =
+                    "default";
+
+            }
+
+
+            if (
+                profileName &&
+                data.profile
+            ) {
+
+                const name =
+                    data.profile.name ||
+                    data.profile.first_name ||
+                    "";
+
+                if (name) {
+
+                    profileName.textContent =
+                        name;
+
+                    profileName.style.display =
+                        "block";
+
+                }
+
+            }
+
+            return;
+        }
+
+
+        status.textContent =
+            "Not connected";
+
+
+        if (button) {
+
+            button.textContent =
+                "CONNECT ↗";
+
+            button.disabled =
+                false;
+
+        }
+
+
+        if (profileName) {
+
+            profileName.textContent =
+                "";
+
+            profileName.style.display =
+                "none";
+
+        }
+
+    }
+    catch (error) {
+
+        console.error(
+            "LinkedIn status error:",
+            error
+        );
+
+        status.textContent =
+            "Not connected";
+
+        if (button) {
+
+            button.textContent =
+                "CONNECT ↗";
+
+            button.disabled =
+                false;
+
+        }
+
+    }
+
+}    
+
 
 // ============================================================
 // REFRESH
@@ -1351,7 +1511,6 @@ function escapeHtml(
 // ============================================================
 // STARTUP
 // ============================================================
-
 async function startup() {
 
     createParticles();
@@ -1360,8 +1519,10 @@ async function startup() {
 
     loadDashboard();
 
+    checkLinkedInStatus();
+
     setInterval(
-        loadDashboard,
+        checkLinkedInStatus,
         5000
     );
 

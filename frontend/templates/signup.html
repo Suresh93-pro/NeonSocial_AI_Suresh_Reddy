@@ -172,6 +172,22 @@ input {
 
 }
 
+input:focus {
+
+    border-color:
+        #00f5ff;
+
+    box-shadow:
+        0 0 15px
+        rgba(
+            0,
+            245,
+            255,
+            .15
+        );
+
+}
+
 button {
 
     width: 100%;
@@ -196,6 +212,20 @@ button {
             #00f5ff,
             #00ff9d
         );
+
+}
+
+button:hover {
+
+    transform: translateY(-1px);
+
+}
+
+button:disabled {
+
+    opacity: .7;
+
+    cursor: wait;
 
 }
 
@@ -227,6 +257,12 @@ button {
 
 }
 
+.login a:hover {
+
+    text-decoration: underline;
+
+}
+
 </style>
 
 </head>
@@ -245,6 +281,29 @@ Create your account
 
 <form id="signupForm">
 
+
+<!-- ========================================================
+     NAME
+     ======================================================== -->
+
+<label>
+Name
+</label>
+
+<input
+    id="name"
+    type="text"
+    placeholder="Enter your name"
+    autocomplete="name"
+    maxlength="100"
+    required
+>
+
+
+<!-- ========================================================
+     EMAIL
+     ======================================================== -->
+
 <label>
 Email
 </label>
@@ -253,8 +312,14 @@ Email
     id="email"
     type="email"
     placeholder="Enter your email"
+    autocomplete="email"
     required
 >
+
+
+<!-- ========================================================
+     PASSWORD
+     ======================================================== -->
 
 <label>
 Password
@@ -264,8 +329,15 @@ Password
     id="password"
     type="password"
     placeholder="Minimum 8 characters"
+    autocomplete="new-password"
+    minlength="8"
     required
 >
+
+
+<!-- ========================================================
+     CONFIRM PASSWORD
+     ======================================================== -->
 
 <label>
 Confirm Password
@@ -275,19 +347,39 @@ Confirm Password
     id="confirmPassword"
     type="password"
     placeholder="Confirm your password"
+    autocomplete="new-password"
+    minlength="8"
     required
 >
 
-<button type="submit">
+
+<!-- ========================================================
+     CREATE ACCOUNT
+     ======================================================== -->
+
+<button
+    id="signupButton"
+    type="submit"
+>
 CREATE ACCOUNT
 </button>
 
 </form>
 
+
+<!-- ========================================================
+     MESSAGE
+     ======================================================== -->
+
 <div
     id="message"
     class="message"
 ></div>
+
+
+<!-- ========================================================
+     LOGIN
+     ======================================================== -->
 
 <div class="login">
 
@@ -301,7 +393,12 @@ Login
 
 </div>
 
+
 <script>
+
+/* ============================================================
+   ELEMENTS
+   ============================================================ */
 
 const form =
     document.getElementById(
@@ -313,26 +410,150 @@ const message =
         "message"
     );
 
+const signupButton =
+    document.getElementById(
+        "signupButton"
+    );
+
+const nameInput =
+    document.getElementById(
+        "name"
+    );
+
+const emailInput =
+    document.getElementById(
+        "email"
+    );
+
+const passwordInput =
+    document.getElementById(
+        "password"
+    );
+
+const confirmPasswordInput =
+    document.getElementById(
+        "confirmPassword"
+    );
+
+
+/* ============================================================
+   SIGNUP
+   ============================================================ */
+
 form.addEventListener(
     "submit",
     async function(event) {
 
         event.preventDefault();
 
+
+        /* ====================================================
+           GET VALUES
+           ==================================================== */
+
+        const name =
+            nameInput.value.trim();
+
         const email =
-            document.getElementById(
-                "email"
-            ).value;
+            emailInput.value.trim().toLowerCase();
 
         const password =
-            document.getElementById(
-                "password"
-            ).value;
+            passwordInput.value;
 
         const confirmPassword =
-            document.getElementById(
-                "confirmPassword"
-            ).value;
+            confirmPasswordInput.value;
+
+
+        message.textContent = "";
+
+
+        /* ====================================================
+           NAME VALIDATION
+           ==================================================== */
+
+        if (!name) {
+
+            message.textContent =
+                "Please enter your name.";
+
+            nameInput.focus();
+
+            return;
+
+        }
+
+
+        if (name.length < 2) {
+
+            message.textContent =
+                "Name must contain at least 2 characters.";
+
+            nameInput.focus();
+
+            return;
+
+        }
+
+
+        /* ====================================================
+           EMAIL VALIDATION
+           ==================================================== */
+
+        if (!email) {
+
+            message.textContent =
+                "Please enter your email.";
+
+            emailInput.focus();
+
+            return;
+
+        }
+
+
+        /* ====================================================
+           PASSWORD VALIDATION
+           ==================================================== */
+
+        if (!password) {
+
+            message.textContent =
+                "Please enter your password.";
+
+            passwordInput.focus();
+
+            return;
+
+        }
+
+
+        if (password.length < 8) {
+
+            message.textContent =
+                "Password must contain at least 8 characters.";
+
+            passwordInput.focus();
+
+            return;
+
+        }
+
+
+        /* ====================================================
+           CONFIRM PASSWORD
+           ==================================================== */
+
+        if (!confirmPassword) {
+
+            message.textContent =
+                "Please confirm your password.";
+
+            confirmPasswordInput.focus();
+
+            return;
+
+        }
+
 
         if (
             password !==
@@ -342,21 +563,30 @@ form.addEventListener(
             message.textContent =
                 "Passwords do not match.";
 
-            return;
-
-        }
-
-        if (password.length < 8) {
-
-            message.textContent =
-                "Password must contain at least 8 characters.";
+            confirmPasswordInput.focus();
 
             return;
 
         }
+
+
+        /* ====================================================
+           LOADING
+           ==================================================== */
 
         message.textContent =
             "Creating account...";
+
+        signupButton.disabled =
+            true;
+
+        signupButton.textContent =
+            "CREATING ACCOUNT...";
+
+
+        /* ====================================================
+           SEND TO BACKEND
+           ==================================================== */
 
         try {
 
@@ -367,45 +597,185 @@ form.addEventListener(
 
                         method: "POST",
 
+                        credentials: "include",
+
                         headers: {
+
                             "Content-Type":
+                                "application/json",
+
+                            "Accept":
                                 "application/json"
+
                         },
 
-                        body: JSON.stringify({
+                        body:
+                            JSON.stringify({
 
-                            email:
-                                email,
+                                name:
+                                    name,
 
-                            password:
-                                password
+                                email:
+                                    email,
 
-                        })
+                                password:
+                                    password
+
+                            })
 
                     }
                 );
 
-            const data =
-                await response.json();
 
-            if (!data.success) {
+            /* =================================================
+               READ RESPONSE
+               ================================================= */
+
+            let data = {};
+
+            try {
+
+                data =
+                    await response.json();
+
+            }
+            catch (
+                jsonError
+            ) {
+
+                data = {};
+
+            }
+
+
+            /* =================================================
+               ACCOUNT CREATED
+               ================================================= */
+
+            if (
+                response.ok &&
+                data.success === true
+            ) {
+
+
+                /*
+                 * Save the actual user's name.
+                 *
+                 * Example:
+                 *
+                 * Laxmi  -> Laxmi
+                 * Rahul  -> Rahul
+                 * Suresh -> Suresh
+                 */
+
+                localStorage.setItem(
+                    "neonsocial_user_name",
+                    name
+                );
+
+
+                /*
+                 * Save email too.
+                 */
+
+                localStorage.setItem(
+                    "neonsocial_user_email",
+                    email
+                );
+
+
+                /*
+                 * If backend returns the
+                 * actual user object, use
+                 * that information.
+                 */
+
+                if (
+                    data.user &&
+                    typeof data.user === "object"
+                ) {
+
+                    if (
+                        data.user.name
+                    ) {
+
+                        localStorage.setItem(
+                            "neonsocial_user_name",
+                            data.user.name
+                        );
+
+                    }
+
+                    if (
+                        data.user.email
+                    ) {
+
+                        localStorage.setItem(
+                            "neonsocial_user_email",
+                            data.user.email
+                        );
+
+                    }
+
+                }
+
 
                 message.textContent =
-                    data.error ||
-                    "Unable to create account.";
+                    "Account created successfully.";
+
+
+                /*
+                 * Redirect to login.
+                 *
+                 * The user can now log in with
+                 * their own email and password.
+                 */
+
+                setTimeout(
+                    function() {
+
+                        window.location.href =
+                            "/login";
+
+                    },
+                    500
+                );
 
                 return;
 
             }
 
-            window.location.href =
-                "/";
+
+            /* =================================================
+               ACCOUNT CREATION FAILED
+               ================================================= */
+
+            message.textContent =
+                data.error ||
+                "Unable to create account.";
+
+            signupButton.disabled =
+                false;
+
+            signupButton.textContent =
+                "CREATE ACCOUNT";
 
         }
         catch(error) {
 
+            console.error(
+                "Signup error:",
+                error
+            );
+
             message.textContent =
                 "Unable to connect to server.";
+
+            signupButton.disabled =
+                false;
+
+            signupButton.textContent =
+                "CREATE ACCOUNT";
 
         }
 

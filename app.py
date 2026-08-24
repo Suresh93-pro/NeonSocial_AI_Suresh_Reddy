@@ -1161,7 +1161,148 @@ For the fastest results, tell me exactly what you want to build or learn."""
 # ============================================================
 # AUTHENTICATION API
 # ============================================================
+# ============================================================
+# SIGNUP PAGE
+# ============================================================
 
+@app.route("/signup")
+def signup_page():
+
+    return render_template(
+        "signup.html"
+    )
+@app.route("/login")
+def login_page():
+
+    return render_template(
+        "login.html"
+    )
+
+
+# ============================================================
+# SIGNUP API
+# ============================================================
+
+
+@app.route(
+    "/api/auth/signup",
+    methods=["POST"]
+)
+@app.route(
+    "/api/auth/register",
+    methods=["POST"]
+)
+def auth_signup():
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+    name = str(
+        data.get(
+            "name",
+            ""
+        )
+    ).strip()
+
+    email = str(
+        data.get(
+            "email",
+            ""
+        )
+    ).strip().lower()
+
+    password = str(
+        data.get(
+            "password",
+            ""
+        )
+    )
+
+    confirm_password = str(
+        data.get(
+            "confirm_password",
+            data.get(
+                "confirmPassword",
+                ""
+            )
+        )
+    )
+
+    if not name:
+
+        return jsonify({
+            "success": False,
+            "error": "Name is required."
+        }), 400
+
+    if not email:
+
+        return jsonify({
+            "success": False,
+            "error": "Email is required."
+        }), 400
+
+    if not password:
+
+        return jsonify({
+            "success": False,
+            "error": "Password is required."
+        }), 400
+
+    if len(password) < 8:
+
+        return jsonify({
+            "success": False,
+            "error": "Password must contain at least 8 characters."
+        }), 400
+
+    if confirm_password and password != confirm_password:
+
+        return jsonify({
+            "success": False,
+            "error": "Passwords do not match."
+        }), 400
+
+    try:
+
+        success, result = create_user(
+            name,
+            email,
+            password
+        )
+
+    except Exception as error:
+
+        print(
+            "Signup error:",
+            error
+        )
+
+        return jsonify({
+            "success": False,
+            "error": "Account creation service unavailable."
+        }), 500
+
+    if not success:
+
+        return jsonify({
+            "success": False,
+            "error": result
+        }), 400
+
+    return jsonify({
+
+        "success":
+            True,
+
+        "message":
+            "Account created successfully.",
+
+        "user":
+            result
+
+    }), 201
 @app.route(
     "/api/auth/login",
     methods=["POST"]

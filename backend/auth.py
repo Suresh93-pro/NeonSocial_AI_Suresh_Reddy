@@ -59,6 +59,8 @@ def init_auth_database():
 
             id INTEGER PRIMARY KEY AUTOINCREMENT,
 
+            name TEXT NOT NULL DEFAULT '',
+
             email TEXT NOT NULL UNIQUE,
 
             password_hash TEXT NOT NULL,
@@ -68,9 +70,42 @@ def init_auth_database():
         """
     )
 
+    # --------------------------------------------------------
+    # MIGRATE OLD DATABASE
+    # --------------------------------------------------------
+
+    cursor.execute(
+        "PRAGMA table_info(users)"
+    )
+
+    columns = [
+        row["name"]
+        for row in cursor.fetchall()
+    ]
+
+    if "name" not in columns:
+
+        cursor.execute(
+            """
+            ALTER TABLE users
+            ADD COLUMN name TEXT NOT NULL DEFAULT ''
+            """
+        )
+
     connection.commit()
 
     connection.close()
+
+
+# ============================================================
+# NORMALIZE NAME
+# ============================================================
+
+def normalize_name(name):
+
+    return str(
+        name or ""
+    ).strip()
 
 
 # ============================================================
@@ -151,13 +186,34 @@ def verify_password(
 # ============================================================
 
 def create_user(
+    name,
     email,
     password
 ):
 
+    name = normalize_name(
+        name
+    )
+
     email = normalize_email(
         email
     )
+
+    # --------------------------------------------------------
+    # NAME VALIDATION
+    # --------------------------------------------------------
+
+    if not name:
+
+        return False, "Name is required."
+
+    if len(name) > 100:
+
+        return False, "Name is too long."
+
+    # --------------------------------------------------------
+    # EMAIL VALIDATION
+    # --------------------------------------------------------
 
     if not email:
 
@@ -171,6 +227,10 @@ def create_user(
 
         return False, "Enter a valid email address."
 
+    # --------------------------------------------------------
+    # PASSWORD VALIDATION
+    # --------------------------------------------------------
+
     if not password:
 
         return False, "Password is required."
@@ -180,6 +240,10 @@ def create_user(
         return False, (
             "Password must contain at least 8 characters."
         )
+
+    # --------------------------------------------------------
+    # HASH PASSWORD
+    # --------------------------------------------------------
 
     password_hash = hash_password(
         password
@@ -201,13 +265,15 @@ def create_user(
             """
             INSERT INTO users
             (
+                name,
                 email,
                 password_hash,
                 created_at
             )
-            VALUES (?, ?, ?)
+            VALUES (?, ?, ?, ?)
             """,
             (
+                name,
                 email,
                 password_hash,
                 created_at
@@ -219,9 +285,18 @@ def create_user(
         user_id = cursor.lastrowid
 
         return True, {
-            "id": user_id,
-            "email": email,
-            "created_at": created_at
+
+            "id":
+                user_id,
+
+            "name":
+                name,
+
+            "email":
+                email,
+
+            "created_at":
+                created_at
         }
 
     except sqlite3.IntegrityError:
@@ -256,6 +331,7 @@ def authenticate_user(
         """
         SELECT
             id,
+            name,
             email,
             password_hash,
             created_at
@@ -284,6 +360,9 @@ def authenticate_user(
 
         "id":
             user["id"],
+
+        "name":
+            user["name"],
 
         "email":
             user["email"],
@@ -315,6 +394,7 @@ def get_current_user():
         """
         SELECT
             id,
+            name,
             email,
             created_at
         FROM users
@@ -338,6 +418,9 @@ def get_current_user():
         "id":
             user["id"],
 
+        "name":
+            user["name"],
+
         "email":
             user["email"],
 
@@ -355,6 +438,8 @@ def login_user(user):
     session.clear()
 
     session["user_id"] = user["id"]
+
+    session["user_name"] = user["name"]
 
     session["user_email"] = user["email"]
 

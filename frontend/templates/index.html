@@ -20,10 +20,10 @@
 </head>
 
 <body>
-    <!-- ======================================================
+
+<!-- ======================================================
      NEONSOCIAL LOGIN PAGE
-     ADD ONLY — EXISTING DASHBOARD REMAINS UNCHANGED
-====================================================== -->
+     ====================================================== -->
 
 <div id="loginPage" class="login-page">
 
@@ -54,28 +54,36 @@
         <div class="login-divider"></div>
 
         <div class="login-heading">
-            <h2>Welcome back, Suresh</h2>
+
+            <!-- CHANGED: Suresh removed -->
+            <h2 id="loginWelcome">
+                Welcome back
+            </h2>
 
             <p>
                 Enter your command center and manage
                 your intelligent social media workflow.
             </p>
+
         </div>
 
         <div class="login-field">
 
-            <label>USERNAME</label>
+            <!-- CHANGED: USERNAME -> EMAIL -->
+            <label>EMAIL</label>
 
             <div class="login-input">
+
                 <span>◉</span>
 
                 <input
                     id="loginUsername"
-                    type="text"
-                    value="Suresh"
-                    placeholder="Enter username"
+                    type="email"
+                    value=""
+                    placeholder="Enter your email"
                     autocomplete="username"
                 >
+
             </div>
 
         </div>
@@ -120,6 +128,38 @@
             class="login-error"
         ></div>
 
+
+        <!-- ==================================================
+             NEW: SIGNUP LINK
+             ================================================== -->
+
+        <div
+            class="login-signup"
+            style="
+                margin-top: 22px;
+                text-align: center;
+                color: #9da9cc;
+                font-size: 14px;
+            "
+        >
+
+            Don't have an account?
+
+            <a
+                href="/signup"
+                style="
+                    color: #00f5ff;
+                    text-decoration: none;
+                    margin-left: 5px;
+                    font-weight: 600;
+                "
+            >
+                Create account
+            </a>
+
+        </div>
+
+
         <div class="login-features">
 
             <div>
@@ -158,6 +198,7 @@
     </div>
 
 </div>
+
 
 <!-- ======================================================
      BACKGROUND
@@ -280,25 +321,34 @@
 
     <div class="linkedin-card">
 
-        <div class="linkedin-logo">
-            in
-        </div>
+    <div class="linkedin-logo">
+        in
+    </div>
 
-        <div>
+    <div>
 
-            <strong>LinkedIn</strong>
+        <strong>LinkedIn</strong>
 
-            <span id="linkedinStatus">
-                Checking...
-            </span>
+        <span id="linkedinStatus">
+            Checking...
+        </span>
 
-        </div>
-
-        <button id="linkedinBtn">
-            CONNECT ↗
-        </button>
+        <small
+            id="linkedinProfileName"
+            style="
+                display:none;
+                margin-top:4px;
+                opacity:.75;
+            "
+        ></small>
 
     </div>
+
+    <button id="linkedinBtn">
+        CONNECT ↗
+    </button>
+
+</div>
 
 
     <div class="system-card">
@@ -366,11 +416,16 @@
 
         <div class="profile">
 
-            <div class="profile-avatar">
+            <!-- CHANGED: dynamic initials -->
+            <div
+                class="profile-avatar"
+                id="profileAvatar"
+            >
                 SR
             </div>
 
-            <span>
+            <!-- CHANGED: dynamic name -->
+            <span id="profileName">
                 Suresh
             </span>
 
@@ -555,7 +610,8 @@
 
                 <div>
 
-                    <strong>
+                    <!-- CHANGED: dynamic greeting -->
+                    <strong id="aiGreeting">
                         Hello, Suresh 👋
                     </strong>
 
@@ -1304,30 +1360,295 @@
 </div>
 
 
+<!-- ======================================================
+     MAIN JAVASCRIPT
+====================================================== -->
+
 <script
     src="{{ url_for('static', filename='app.js') }}"
 ></script>
 
-</body>
 
-</html>
+<!-- ======================================================
+     DYNAMIC USER NAME
+     ======================================================
+     This does NOT disturb your existing app.js.
+     It reads the authenticated user and changes only
+     the name-related text.
+====================================================== -->
+
+<script>
+
+(function loadNeonSocialUser() {
+
+    function getDisplayName(user) {
+
+        if (!user) {
+            return "User";
+        }
+
+        /*
+         * Preferred:
+         * backend returns the actual name entered
+         * during signup.
+         */
+        if (
+            typeof user.name === "string" &&
+            user.name.trim()
+        ) {
+
+            return user.name.trim();
+
+        }
+
+        /*
+         * Fallback:
+         * If older accounts do not have a name,
+         * use the part before @ in their email.
+         */
+        if (
+            typeof user.email === "string" &&
+            user.email.includes("@")
+        ) {
+
+            const emailName =
+                user.email
+                    .split("@")[0]
+                    .trim();
+
+            if (emailName) {
+
+                return emailName
+                    .replace(/[._-]+/g, " ")
+                    .replace(/\b\w/g, function(letter) {
+                        return letter.toUpperCase();
+                    });
+
+            }
+
+        }
+
+        return "User";
+    }
+
+
+    function getInitials(name) {
+
+        if (!name) {
+            return "U";
+        }
+
+        const parts =
+            name
+                .trim()
+                .split(/\s+/)
+                .filter(Boolean);
+
+        if (parts.length === 1) {
+
+            return parts[0]
+                .substring(0, 2)
+                .toUpperCase();
+
+        }
+
+        return (
+            parts[0].charAt(0) +
+            parts[parts.length - 1].charAt(0)
+        ).toUpperCase();
+
+    }
+
+
+    function updateUserInterface(user) {
+
+        const name =
+            getDisplayName(user);
+
+        const initials =
+            getInitials(name);
+
+
+        /*
+         * LOGIN WELCOME
+         */
+        const loginWelcome =
+            document.getElementById(
+                "loginWelcome"
+            );
+
+        if (loginWelcome) {
+
+            loginWelcome.textContent =
+                "Welcome back, " + name;
+
+        }
+
+
+        /*
+         * TOP RIGHT PROFILE
+         */
+        const profileName =
+            document.getElementById(
+                "profileName"
+            );
+
+        if (profileName) {
+
+            profileName.textContent =
+                name;
+
+        }
+
+
+        /*
+         * PROFILE INITIALS
+         */
+        const profileAvatar =
+            document.getElementById(
+                "profileAvatar"
+            );
+
+        if (profileAvatar) {
+
+            profileAvatar.textContent =
+                initials;
+
+        }
+
+
+        /*
+         * NEON AI GREETING
+         */
+        const aiGreeting =
+            document.getElementById(
+                "aiGreeting"
+            );
+
+        if (aiGreeting) {
+
+            aiGreeting.textContent =
+                "Hello, " + name + " 👋";
+
+        }
+
+    }
+
+
+    async function loadUser() {
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/auth/me",
+                    {
+                        method: "GET",
+                        credentials: "include",
+                        headers: {
+                            "Accept":
+                                "application/json"
+                        }
+                    }
+                );
+
+
+            if (!response.ok) {
+
+                return;
+
+            }
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                data &&
+                data.success === true &&
+                data.authenticated === true &&
+                data.user
+            ) {
+
+                updateUserInterface(
+                    data.user
+                );
+
+            }
+
+        }
+        catch(error) {
+
+            console.warn(
+                "Unable to load NeonSocial user:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /*
+     * Run after page has loaded.
+     */
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            loadUser
+        );
+
+    }
+    else {
+
+        loadUser();
+
+    }
+
+
+})();
+
+</script>
+
+
+<!-- ======================================================
+     NEON FOOTER
+====================================================== -->
+
 <footer class="neon-footer">
+
     <div class="footer-glow"></div>
 
     <div class="footer-brand">
-        <div class="footer-logo">N</div>
+
+        <div class="footer-logo">
+            N
+        </div>
 
         <div>
-            <div class="footer-title">NEONSOCIAL</div>
+
+            <div class="footer-title">
+                NEONSOCIAL
+            </div>
+
             <div class="footer-subtitle">
                 AI COMMAND CENTER
             </div>
+
         </div>
+
     </div>
 
     <div class="footer-author">
+
         BUILT BY
         <strong>SURESH REDDY</strong>
+
     </div>
 
     <div class="footer-links">
@@ -1338,10 +1659,15 @@
             rel="noopener noreferrer"
             class="footer-social linkedin"
         >
+
             <span>in</span>
+
             LINKEDIN
+
             <b>↗</b>
+
         </a>
+
 
         <a
             href="https://github.com/Suresh93-pro"
@@ -1349,15 +1675,29 @@
             rel="noopener noreferrer"
             class="footer-social github"
         >
+
             <span>◉</span>
+
             GITHUB
+
             <b>↗</b>
+
         </a>
 
     </div>
 
+
     <div class="footer-status">
+
         <span class="status-dot"></span>
+
         NEON SYSTEM ONLINE
+
     </div>
+
 </footer>
+
+
+</body>
+
+</html>
