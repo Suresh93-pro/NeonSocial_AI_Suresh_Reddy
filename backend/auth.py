@@ -417,6 +417,74 @@ def authenticate_user(
         "created_at":
             user["created_at"]
     }
+# ============================================================
+# RESET USER PASSWORD
+# ============================================================
+
+def reset_user_password(
+    email,
+    new_password
+):
+    email = normalize_email(
+        email
+    )
+
+    if not email:
+        return False, "Email is required."
+
+    if not new_password:
+        return False, "New password is required."
+
+    if len(new_password) < 8:
+        return False, (
+            "Password must contain at least 8 characters."
+        )
+
+    password_hash = hash_password(
+        new_password
+    )
+
+    connection = get_db()
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute(
+            """
+            UPDATE users
+            SET password_hash = ?
+            WHERE email = ?
+            """,
+            (
+                password_hash,
+                email
+            )
+        )
+
+        if cursor.rowcount == 0:
+            return False, (
+                "No account was found with this email."
+            )
+
+        connection.commit()
+
+        return True, (
+            "Password updated successfully."
+        )
+
+    except Exception as error:
+
+        print(
+            "Password reset error:",
+            error
+        )
+
+        return False, (
+            "Unable to reset password."
+        )
+
+    finally:
+
+        connection.close()
 
 
 # ============================================================

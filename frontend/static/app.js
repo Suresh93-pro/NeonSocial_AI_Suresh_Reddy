@@ -3370,3 +3370,1480 @@ startup();
     );
 
 })();
+/* ============================================================
+   NEONSOCIAL AI
+   FINAL AUTHENTICATION FIX
+   ============================================================
+
+   IMPORTANT:
+
+   THIS BLOCK IS ADDED TO THE ORIGINAL APP.JS.
+
+   DO NOT DELETE THE EXISTING CODE ABOVE.
+
+   FEATURES:
+
+   1. Existing registered email + correct password -> LOGIN
+   2. Wrong password -> ERROR
+   3. Forgot Access Key -> RESET PANEL
+   4. Reset password -> BACKEND DATABASE
+   5. New password -> LOGIN
+   6. Existing users NEVER need to create another account
+   7. Existing dashboard / AI / LinkedIn / scheduling remain
+      untouched.
+============================================================ */
+
+(function () {
+
+    "use strict";
+
+
+    /* ========================================================
+       HELPER
+    ======================================================== */
+
+    function neonGet(id) {
+
+        return document.getElementById(id);
+
+    }
+
+
+    /* ========================================================
+       LOGIN ERROR
+    ======================================================== */
+
+    function neonLoginMessage(
+        message,
+        success
+    ) {
+
+        const box =
+            neonGet("loginError");
+
+
+        if (!box) {
+
+            return;
+
+        }
+
+
+        box.textContent =
+            message || "";
+
+
+        if (message) {
+
+            box.classList.add(
+                "show"
+            );
+
+        }
+        else {
+
+            box.classList.remove(
+                "show"
+            );
+
+        }
+
+
+        if (success) {
+
+            box.style.color =
+                "#00f5b0";
+
+        }
+        else {
+
+            box.style.color =
+                "#ff4f9a";
+
+        }
+
+    }
+
+
+    /* ========================================================
+       RESET MESSAGE
+    ======================================================== */
+
+    function neonResetMessage(
+        message,
+        success
+    ) {
+
+        const box =
+            neonGet(
+                "resetPasswordMessage"
+            );
+
+
+        if (!box) {
+
+            return;
+
+        }
+
+
+        box.textContent =
+            message || "";
+
+
+        if (message) {
+
+            box.classList.add(
+                "show"
+            );
+
+        }
+        else {
+
+            box.classList.remove(
+                "show"
+            );
+
+        }
+
+
+        if (success) {
+
+            box.style.color =
+                "#00f5b0";
+
+        }
+        else {
+
+            box.style.color =
+                "#ff4f9a";
+
+        }
+
+    }
+
+
+    /* ========================================================
+       SERVER REQUEST
+    ======================================================== */
+
+    async function neonRequest(
+        url,
+        method,
+        body
+    ) {
+
+        const response =
+            await fetch(
+                url,
+                {
+
+                    method:
+                        method,
+
+                    credentials:
+                        "include",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json",
+
+                        "Accept":
+                            "application/json"
+
+                    },
+
+                    body:
+                        body
+                            ? JSON.stringify(body)
+                            : undefined
+
+                }
+            );
+
+
+        let data = {};
+
+
+        try {
+
+            data =
+                await response.json();
+
+        }
+        catch (error) {
+
+            data = {};
+
+        }
+
+
+        return {
+
+            response:
+                response,
+
+            data:
+                data
+
+        };
+
+    }
+
+
+    /* ========================================================
+       UPDATE USER DETAILS
+    ======================================================== */
+
+    function updateNeonUser(
+        user
+    ) {
+
+        if (!user) {
+
+            return;
+
+        }
+
+
+        let name =
+            user.name;
+
+
+        if (
+            !name &&
+            user.email &&
+            user.email.includes("@")
+        ) {
+
+            name =
+                user.email
+                    .split("@")[0]
+                    .replace(
+                        /[._-]+/g,
+                        " "
+                    )
+                    .replace(
+                        /\b\w/g,
+                        function (letter) {
+
+                            return letter
+                                .toUpperCase();
+
+                        }
+                    );
+
+        }
+
+
+        if (!name) {
+
+            name =
+                "User";
+
+        }
+
+
+        const parts =
+            name
+                .trim()
+                .split(/\s+/);
+
+
+        let initials;
+
+
+        if (
+            parts.length ===
+            1
+        ) {
+
+            initials =
+                parts[0]
+                    .substring(
+                        0,
+                        2
+                    )
+                    .toUpperCase();
+
+        }
+        else {
+
+            initials =
+                (
+                    parts[0][0] +
+                    parts[
+                        parts.length - 1
+                    ][0]
+                ).toUpperCase();
+
+        }
+
+
+        /* LOGIN WELCOME */
+
+        const welcome =
+            neonGet(
+                "loginWelcome"
+            );
+
+
+        if (welcome) {
+
+            welcome.textContent =
+                "Welcome back, " +
+                name;
+
+        }
+
+
+        /* PROFILE */
+
+        const profileName =
+            neonGet(
+                "profileName"
+            );
+
+
+        if (profileName) {
+
+            profileName.textContent =
+                name;
+
+        }
+
+
+        const profileAvatar =
+            neonGet(
+                "profileAvatar"
+            );
+
+
+        if (profileAvatar) {
+
+            profileAvatar.textContent =
+                initials;
+
+        }
+
+
+        /* DROPDOWN */
+
+        const dropdownName =
+            neonGet(
+                "dropdownName"
+            );
+
+
+        if (dropdownName) {
+
+            dropdownName.textContent =
+                name;
+
+        }
+
+
+        const dropdownEmail =
+            neonGet(
+                "dropdownEmail"
+            );
+
+
+        if (dropdownEmail) {
+
+            dropdownEmail.textContent =
+                user.email || "";
+
+        }
+
+
+        const dropdownAvatar =
+            neonGet(
+                "dropdownAvatar"
+            );
+
+
+        if (dropdownAvatar) {
+
+            dropdownAvatar.textContent =
+                initials;
+
+        }
+
+
+        /* AI GREETING */
+
+        const greeting =
+            neonGet(
+                "aiGreeting"
+            );
+
+
+        if (greeting) {
+
+            greeting.textContent =
+                "Hello, " +
+                name +
+                " 👋";
+
+        }
+
+    }
+
+
+    /* ========================================================
+       CHECK EXISTING SESSION
+    ======================================================== */
+
+    async function checkNeonSession() {
+
+        try {
+
+            const result =
+                await neonRequest(
+                    "/api/auth/me",
+                    "GET",
+                    null
+                );
+
+
+            if (
+                result.response.ok &&
+                result.data &&
+                result.data.success === true &&
+                result.data.authenticated === true &&
+                result.data.user
+            ) {
+
+                document.body.classList.add(
+                    "authenticated"
+                );
+
+
+                updateNeonUser(
+                    result.data.user
+                );
+
+
+                const loginPage =
+                    neonGet(
+                        "loginPage"
+                    );
+
+
+                if (loginPage) {
+
+                    loginPage.classList.add(
+                        "hidden"
+                    );
+
+                    loginPage.style.display =
+                        "none";
+
+                }
+
+
+                return true;
+
+            }
+
+        }
+        catch (error) {
+
+            console.warn(
+                "NeonSocial session check:",
+                error
+            );
+
+        }
+
+
+        return false;
+
+    }
+
+
+    /* ========================================================
+       FINAL LOGIN
+    ======================================================== */
+
+    async function neonFinalLogin(
+        event
+    ) {
+
+        event.preventDefault();
+
+        event.stopPropagation();
+
+        event.stopImmediatePropagation();
+
+
+        const emailInput =
+            neonGet(
+                "loginUsername"
+            );
+
+
+        const passwordInput =
+            neonGet(
+                "loginPassword"
+            );
+
+
+        const loginButton =
+            neonGet(
+                "loginButton"
+            );
+
+
+        if (
+            !emailInput ||
+            !passwordInput ||
+            !loginButton
+        ) {
+
+            return;
+
+        }
+
+
+        const email =
+            emailInput.value
+                .trim()
+                .toLowerCase();
+
+
+        const password =
+            passwordInput.value;
+
+
+        neonLoginMessage(
+            ""
+        );
+
+
+        /* ====================================================
+           VALIDATION
+        ==================================================== */
+
+        if (!email) {
+
+            neonLoginMessage(
+                "Please enter your registered email."
+            );
+
+            emailInput.focus();
+
+            return;
+
+        }
+
+
+        if (!password) {
+
+            neonLoginMessage(
+                "Please enter your access key."
+            );
+
+            passwordInput.focus();
+
+            return;
+
+        }
+
+
+        const original =
+            loginButton.innerHTML;
+
+
+        loginButton.disabled =
+            true;
+
+
+        loginButton.innerHTML =
+            "<span>AUTHENTICATING...</span><b>◌</b>";
+
+
+        try {
+
+            /* =================================================
+               REAL BACKEND LOGIN
+
+               IMPORTANT:
+
+               This searches the existing users table through
+               your backend.
+
+               It DOES NOT create an account.
+
+               Therefore an existing account can log in.
+            ================================================= */
+
+            const result =
+                await neonRequest(
+
+                    "/api/auth/login",
+
+                    "POST",
+
+                    {
+
+                        email:
+                            email,
+
+                        password:
+                            password
+
+                    }
+
+                );
+
+
+            const response =
+                result.response;
+
+
+            const data =
+                result.data;
+
+
+            console.log(
+                "NEONSOCIAL LOGIN:",
+                response.status,
+                data
+            );
+
+
+            /* =================================================
+               SUCCESS
+            ================================================= */
+
+            if (
+                response.ok &&
+                data &&
+                data.success === true
+            ) {
+
+                neonLoginMessage(
+                    ""
+                );
+
+
+                document.body.classList.add(
+                    "authenticated"
+                );
+
+
+                const loginPage =
+                    neonGet(
+                        "loginPage"
+                    );
+
+
+                if (loginPage) {
+
+                    loginPage.classList.add(
+                        "hidden"
+                    );
+
+                    loginPage.style.display =
+                        "none";
+
+                }
+
+
+                /*
+                 * Get the ACTUAL authenticated account.
+                 */
+
+                try {
+
+                    const userResult =
+                        await neonRequest(
+                            "/api/auth/me",
+                            "GET",
+                            null
+                        );
+
+
+                    if (
+                        userResult.response.ok &&
+                        userResult.data &&
+                        userResult.data.user
+                    ) {
+
+                        updateNeonUser(
+                            userResult.data.user
+                        );
+
+                    }
+
+                }
+                catch (error) {
+
+                    console.warn(
+                        "Unable to load user:",
+                        error
+                    );
+
+                }
+
+
+                /*
+                 * IMPORTANT:
+                 *
+                 * Existing account goes to the
+                 * main NeonSocial application.
+                 *
+                 * It NEVER goes to signup.
+                 */
+
+                setTimeout(
+                    function () {
+
+                        window.location.replace(
+                            "/"
+                        );
+
+                    },
+                    200
+                );
+
+
+                return;
+
+            }
+
+
+            /* =================================================
+               LOGIN FAILED
+            ================================================= */
+
+            neonLoginMessage(
+
+                data.message ||
+                data.error ||
+                "Invalid email or password."
+
+            );
+
+        }
+        catch (error) {
+
+            console.error(
+                "NEONSOCIAL LOGIN ERROR:",
+                error
+            );
+
+
+            neonLoginMessage(
+                "Unable to connect to NeonSocial AI server."
+            );
+
+        }
+        finally {
+
+            loginButton.disabled =
+                false;
+
+
+            loginButton.innerHTML =
+                original;
+
+        }
+
+    }
+
+
+    /* ========================================================
+       FORGOT PASSWORD
+    ======================================================== */
+
+    function neonFinalForgotPassword(
+        event
+    ) {
+
+        event.preventDefault();
+
+        event.stopPropagation();
+
+        event.stopImmediatePropagation();
+
+
+        const panel =
+            neonGet(
+                "resetPasswordPanel"
+            );
+
+
+        const resetEmail =
+            neonGet(
+                "resetEmail"
+            );
+
+
+        const loginEmail =
+            neonGet(
+                "loginUsername"
+            );
+
+
+        if (!panel) {
+
+            return;
+
+        }
+
+
+        const hidden =
+            panel.style.display ===
+                "none" ||
+
+            getComputedStyle(
+                panel
+            ).display ===
+                "none";
+
+
+        if (hidden) {
+
+            panel.style.display =
+                "block";
+
+
+            /*
+             * Automatically copy the email
+             * from login field.
+             */
+
+            if (
+                resetEmail &&
+                loginEmail &&
+                loginEmail.value.trim()
+            ) {
+
+                resetEmail.value =
+                    loginEmail.value
+                        .trim()
+                        .toLowerCase();
+
+            }
+
+
+            neonResetMessage(
+                ""
+            );
+
+
+            if (resetEmail) {
+
+                setTimeout(
+                    function () {
+
+                        resetEmail.focus();
+
+                    },
+                    50
+                );
+
+            }
+
+        }
+        else {
+
+            panel.style.display =
+                "none";
+
+        }
+
+    }
+
+
+    /* ========================================================
+       RESET PASSWORD
+    ======================================================== */
+
+    async function neonFinalResetPassword(
+        event
+    ) {
+
+        event.preventDefault();
+
+        event.stopPropagation();
+
+        event.stopImmediatePropagation();
+
+
+        const emailInput =
+            neonGet(
+                "resetEmail"
+            );
+
+
+        const newPasswordInput =
+            neonGet(
+                "resetNewPassword"
+            );
+
+
+        const confirmPasswordInput =
+            neonGet(
+                "resetConfirmPassword"
+            );
+
+
+        const resetButton =
+            neonGet(
+                "resetPasswordBtn"
+            );
+
+
+        if (
+            !emailInput ||
+            !newPasswordInput ||
+            !confirmPasswordInput ||
+            !resetButton
+        ) {
+
+            return;
+
+        }
+
+
+        const email =
+            emailInput.value
+                .trim()
+                .toLowerCase();
+
+
+        const newPassword =
+            newPasswordInput.value;
+
+
+        const confirmPassword =
+            confirmPasswordInput.value;
+
+
+        neonResetMessage(
+            ""
+        );
+
+
+        /* ====================================================
+           VALIDATION
+        ==================================================== */
+
+        if (!email) {
+
+            neonResetMessage(
+                "Enter your registered email."
+            );
+
+            emailInput.focus();
+
+            return;
+
+        }
+
+
+        if (
+            newPassword.length <
+            8
+        ) {
+
+            neonResetMessage(
+                "Password must contain at least 8 characters."
+            );
+
+            newPasswordInput.focus();
+
+            return;
+
+        }
+
+
+        if (
+            newPassword !==
+            confirmPassword
+        ) {
+
+            neonResetMessage(
+                "Passwords do not match."
+            );
+
+            confirmPasswordInput.focus();
+
+            return;
+
+        }
+
+
+        const original =
+            resetButton.innerHTML;
+
+
+        resetButton.disabled =
+            true;
+
+
+        resetButton.innerHTML =
+            "<span>RESETTING...</span><b>◌</b>";
+
+
+        try {
+
+            /* =================================================
+               SEND PASSWORD CHANGE TO BACKEND
+
+               This is what changes the password belonging to
+               the EXISTING account.
+            ================================================= */
+
+            const result =
+                await neonRequest(
+
+                    "/api/auth/reset-password",
+
+                    "POST",
+
+                    {
+
+                        email:
+                            email,
+
+                        new_password:
+                            newPassword,
+
+                        confirm_password:
+                            confirmPassword,
+
+                        /*
+                         * Compatibility field.
+                         */
+
+                        password:
+                            newPassword
+
+                    }
+
+                );
+
+
+            const response =
+                result.response;
+
+
+            const data =
+                result.data;
+
+
+            console.log(
+                "NEONSOCIAL PASSWORD RESET:",
+                response.status,
+                data
+            );
+
+
+            /* =================================================
+               SUCCESS
+            ================================================= */
+
+            if (
+                response.ok &&
+                data &&
+                data.success === true
+            ) {
+
+                neonResetMessage(
+
+                    data.message ||
+
+                    "✓ Password reset successfully. You can now login with your new access key.",
+
+                    true
+
+                );
+
+
+                /*
+                 * Put the email and NEW password into
+                 * the login form automatically.
+                 */
+
+                const loginEmail =
+                    neonGet(
+                        "loginUsername"
+                    );
+
+
+                const loginPassword =
+                    neonGet(
+                        "loginPassword"
+                    );
+
+
+                if (loginEmail) {
+
+                    loginEmail.value =
+                        email;
+
+                }
+
+
+                if (loginPassword) {
+
+                    loginPassword.value =
+                        newPassword;
+
+                }
+
+
+                /*
+                 * Clear reset password fields.
+                 */
+
+                newPasswordInput.value =
+                    "";
+
+
+                confirmPasswordInput.value =
+                    "";
+
+
+                /*
+                 * Close reset panel.
+                 */
+
+                setTimeout(
+                    function () {
+
+                        if (panelExists()) {
+
+                            neonGet(
+                                "resetPasswordPanel"
+                            ).style.display =
+                                "none";
+
+                        }
+
+
+                        neonLoginMessage(
+
+                            "Password reset successfully. Login with your new access key.",
+
+                            true
+
+                        );
+
+                    },
+                    1200
+                );
+
+
+                return;
+
+            }
+
+
+            /* =================================================
+               RESET FAILED
+            ================================================= */
+
+            neonResetMessage(
+
+                data.message ||
+                data.error ||
+                "Unable to reset password. Make sure this email belongs to an existing account."
+
+            );
+
+        }
+        catch (error) {
+
+            console.error(
+                "NEONSOCIAL RESET ERROR:",
+                error
+            );
+
+
+            neonResetMessage(
+                "Unable to connect to NeonSocial AI server."
+            );
+
+        }
+        finally {
+
+            resetButton.disabled =
+                false;
+
+
+            resetButton.innerHTML =
+                original;
+
+        }
+
+    }
+
+
+    /* ========================================================
+       PANEL EXISTS
+    ======================================================== */
+
+    function panelExists() {
+
+        return Boolean(
+            neonGet(
+                "resetPasswordPanel"
+            )
+        );
+
+    }
+
+
+    /* ========================================================
+       ENTER KEY
+    ======================================================== */
+
+    function neonEnterSupport() {
+
+        const loginEmail =
+            neonGet(
+                "loginUsername"
+            );
+
+
+        const loginPassword =
+            neonGet(
+                "loginPassword"
+            );
+
+
+        const resetEmail =
+            neonGet(
+                "resetEmail"
+            );
+
+
+        const resetPassword =
+            neonGet(
+                "resetNewPassword"
+            );
+
+
+        const resetConfirm =
+            neonGet(
+                "resetConfirmPassword"
+            );
+
+
+        function loginEnter(
+            event
+        ) {
+
+            if (
+                event.key ===
+                "Enter"
+            ) {
+
+                event.preventDefault();
+
+
+                const button =
+                    neonGet(
+                        "loginButton"
+                    );
+
+
+                if (button) {
+
+                    button.click();
+
+                }
+
+            }
+
+        }
+
+
+        function resetEnter(
+            event
+        ) {
+
+            if (
+                event.key ===
+                "Enter"
+            ) {
+
+                event.preventDefault();
+
+
+                const button =
+                    neonGet(
+                        "resetPasswordBtn"
+                    );
+
+
+                if (button) {
+
+                    button.click();
+
+                }
+
+            }
+
+        }
+
+
+        if (loginEmail) {
+
+            loginEmail.addEventListener(
+                "keydown",
+                loginEnter
+            );
+
+        }
+
+
+        if (loginPassword) {
+
+            loginPassword.addEventListener(
+                "keydown",
+                loginEnter
+            );
+
+        }
+
+
+        if (resetEmail) {
+
+            resetEmail.addEventListener(
+                "keydown",
+                resetEnter
+            );
+
+        }
+
+
+        if (resetPassword) {
+
+            resetPassword.addEventListener(
+                "keydown",
+                resetEnter
+            );
+
+        }
+
+
+        if (resetConfirm) {
+
+            resetConfirm.addEventListener(
+                "keydown",
+                resetEnter
+            );
+
+        }
+
+    }
+
+
+    /* ========================================================
+       INSTALL
+    ======================================================== */
+
+    function installFinalFix() {
+
+        const loginButton =
+            neonGet(
+                "loginButton"
+            );
+
+
+        const forgotButton =
+            neonGet(
+                "forgotPasswordBtn"
+            );
+
+
+        const resetButton =
+            neonGet(
+                "resetPasswordBtn"
+            );
+
+
+        /*
+         * CAPTURE MODE IS IMPORTANT.
+         *
+         * Your original 3466-line app.js has old handlers.
+         *
+         * These handlers run first and stop the old handlers
+         * from sending another request.
+         */
+
+        if (loginButton) {
+
+            loginButton.addEventListener(
+                "click",
+                neonFinalLogin,
+                true
+            );
+
+        }
+
+
+        if (forgotButton) {
+
+            forgotButton.addEventListener(
+                "click",
+                neonFinalForgotPassword,
+                true
+            );
+
+        }
+
+
+        if (resetButton) {
+
+            resetButton.addEventListener(
+                "click",
+                neonFinalResetPassword,
+                true
+            );
+
+        }
+
+
+        neonEnterSupport();
+
+
+        /*
+         * Check existing login session.
+         */
+
+        checkNeonSession();
+
+    }
+
+
+    /* ========================================================
+       START
+    ======================================================== */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            installFinalFix
+        );
+
+    }
+    else {
+
+        installFinalFix();
+
+    }
+
+})();
