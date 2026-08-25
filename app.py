@@ -60,6 +60,7 @@ from backend.auth import (
     get_current_user,
     login_user,
     logout_user,
+    reset_password,
     login_required_api,
     login_required_page
 )
@@ -1433,6 +1434,94 @@ def auth_logout():
             "Logged out successfully."
 
     })
+# ============================================================
+# PASSWORD RESET
+# ============================================================
+
+@app.route(
+    "/api/auth/reset-password",
+    methods=["POST"]
+)
+def auth_reset_password():
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+    email = str(
+        data.get(
+            "email",
+            ""
+        )
+    ).strip().lower()
+
+    new_password = str(
+        data.get(
+            "new_password",
+            ""
+        )
+    )
+
+    confirm_password = str(
+        data.get(
+            "confirm_password",
+            ""
+        )
+    )
+
+    if not email:
+        return jsonify({
+            "success": False,
+            "error": "Email is required."
+        }), 400
+
+    if not new_password:
+        return jsonify({
+            "success": False,
+            "error": "New password is required."
+        }), 400
+
+    if len(new_password) < 8:
+        return jsonify({
+            "success": False,
+            "error": "Password must contain at least 8 characters."
+        }), 400
+
+    if new_password != confirm_password:
+        return jsonify({
+            "success": False,
+            "error": "Passwords do not match."
+        }), 400
+
+    try:
+
+        success, result = reset_password(
+            email,
+            new_password
+        )
+
+        if not success:
+            return jsonify({
+                "success": False,
+                "error": result
+            }), 400
+
+        return jsonify({
+            "success": True,
+            "message": result
+        }), 200
+
+    except Exception as error:
+
+        print(
+            "Password reset endpoint error:",
+            error
+        )
+
+        return jsonify({
+            "success": False,
+            "error": "Password reset service unavailable."
+        }), 500
 # ============================================================
 # FRONTEND
 # ============================================================
