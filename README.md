@@ -11,7 +11,7 @@ pip install -r requirements.txt
 Copy-Item .env.example .env
 python app.py
 ```
-Then open http://127.0.0.1:8000
+Then open https://neonsocial-ai-suresh-reddy.onrender.com
 
 Built by **SURESH REDDY**
 - LinkedIn: https://www.linkedin.com/in/g-suresh-reddy-5232b9414
