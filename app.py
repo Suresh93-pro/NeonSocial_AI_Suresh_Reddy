@@ -1463,6 +1463,25 @@ def index():
 
 
 # ============================================================
+# GOOGLE SEARCH CONSOLE VERIFICATION
+# ============================================================
+
+@app.route(
+    "/google3f3cea12632babe5.html",
+    methods=["GET"]
+)
+def google_search_console_verification():
+
+    return send_from_directory(
+        os.path.join(
+            BASE_DIR,
+            "backend"
+        ),
+        "google3f3cea12632babe5.html"
+    )
+
+
+# ============================================================
 # STATIC FILES
 # ============================================================
 
