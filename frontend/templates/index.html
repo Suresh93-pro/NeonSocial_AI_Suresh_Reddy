@@ -154,6 +154,59 @@
             id="loginError"
             class="login-error"
         ></div>
+       <div class="forgot-password">
+    <button
+        type="button"
+        id="forgotPasswordBtn"
+    >
+        Forgot password?
+    </button>
+</div>
+
+<div
+    id="resetPasswordPanel"
+    class="reset-password-panel"
+    style="display:none;"
+>
+    <div class="reset-title">
+        RESET ACCESS KEY
+    </div>
+
+    <input
+        type="email"
+        id="resetEmail"
+        placeholder="Enter your registered email"
+        autocomplete="email"
+    >
+
+    <input
+        type="password"
+        id="resetNewPassword"
+        placeholder="New password (8+ characters)"
+        autocomplete="new-password"
+    >
+
+    <input
+        type="password"
+        id="resetConfirmPassword"
+        placeholder="Confirm new password"
+        autocomplete="new-password"
+    >
+
+    <button
+        type="button"
+        id="resetPasswordBtn"
+        class="login-button"
+    >
+        <span>RESET PASSWORD</span>
+        <b>→</b>
+    </button>
+
+    <div
+        id="resetPasswordMessage"
+        class="login-error"
+    ></div>
+</div>
 
 
         <!-- ==================================================

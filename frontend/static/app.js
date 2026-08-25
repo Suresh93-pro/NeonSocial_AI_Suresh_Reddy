@@ -3127,3 +3127,246 @@ startup();
     loadProfileUser();
 
 })();
+// ============================================================
+// FORGOT PASSWORD
+// ============================================================
+
+(function initForgotPassword() {
+
+    const forgotBtn =
+        document.getElementById("forgotPasswordBtn");
+
+    const panel =
+        document.getElementById("resetPasswordPanel");
+
+    const resetBtn =
+        document.getElementById("resetPasswordBtn");
+
+    const email =
+        document.getElementById("resetEmail");
+
+    const newPassword =
+        document.getElementById("resetNewPassword");
+
+    const confirmPassword =
+        document.getElementById("resetConfirmPassword");
+
+    const message =
+        document.getElementById("resetPasswordMessage");
+
+    if (
+        !forgotBtn ||
+        !panel ||
+        !resetBtn
+    ) {
+        return;
+    }
+
+    forgotBtn.addEventListener(
+        "click",
+        function () {
+
+            panel.style.display =
+                panel.style.display === "none"
+                    ? "block"
+                    : "none";
+
+            if (panel.style.display === "block") {
+
+                email.value = "";
+
+                newPassword.value = "";
+
+                confirmPassword.value = "";
+
+                message.textContent = "";
+
+                message.classList.remove("show");
+
+                email.focus();
+            }
+        }
+    );
+
+
+    resetBtn.addEventListener(
+        "click",
+        async function () {
+
+            const emailValue =
+                email.value.trim();
+
+            const newPasswordValue =
+                newPassword.value;
+
+            const confirmPasswordValue =
+                confirmPassword.value;
+
+
+            message.textContent = "";
+
+            message.classList.remove("show");
+
+
+            if (!emailValue) {
+
+                message.textContent =
+                    "Enter your registered email.";
+
+                message.classList.add("show");
+
+                email.focus();
+
+                return;
+            }
+
+
+            if (newPasswordValue.length < 8) {
+
+                message.textContent =
+                    "Password must contain at least 8 characters.";
+
+                message.classList.add("show");
+
+                newPassword.focus();
+
+                return;
+            }
+
+
+            if (
+                newPasswordValue !==
+                confirmPasswordValue
+            ) {
+
+                message.textContent =
+                    "Passwords do not match.";
+
+                message.classList.add("show");
+
+                confirmPassword.focus();
+
+                return;
+            }
+
+
+            const originalHTML =
+                resetBtn.innerHTML;
+
+            resetBtn.disabled = true;
+
+            resetBtn.innerHTML =
+                "<span>RESETTING...</span>";
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/auth/reset-password",
+                        {
+                            method: "POST",
+
+                            credentials: "include",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json",
+
+                                "Accept":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify({
+
+                                email:
+                                    emailValue,
+
+                                new_password:
+                                    newPasswordValue,
+
+                                confirm_password:
+                                    confirmPasswordValue
+                            })
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    response.ok &&
+                    data.success === true
+                ) {
+
+                    message.textContent =
+                        "✓ Password reset successfully. You can now login.";
+
+                    message.classList.add("show");
+
+                    newPassword.value = "";
+
+                    confirmPassword.value = "";
+
+                    setTimeout(
+                        function () {
+
+                            panel.style.display =
+                                "none";
+
+                            message.textContent =
+                                "";
+
+                            message.classList.remove(
+                                "show"
+                            );
+
+                            document
+                                .getElementById(
+                                    "loginPassword"
+                                )
+                                ?.focus();
+
+                        },
+                        2200
+                    );
+
+                    return;
+                }
+
+
+                message.textContent =
+                    data.error ||
+                    "Unable to reset password.";
+
+                message.classList.add("show");
+
+
+            } catch (error) {
+
+                console.error(
+                    "Password reset error:",
+                    error
+                );
+
+                message.textContent =
+                    "Unable to connect to NeonSocial AI server.";
+
+                message.classList.add("show");
+
+
+            } finally {
+
+                resetBtn.disabled =
+                    false;
+
+                resetBtn.innerHTML =
+                    originalHTML;
+            }
+
+        }
+    );
+
+})();
