@@ -4713,7 +4713,9 @@ def startup():
 #
 # app.run() MUST BE THE LAST OPERATION.
 # ============================================================
-
+@app.route("/google3f3cea12632babe5.html")
+def google_verification():
+    return "google-site-verification: google3f3cea12632babe5.html"
 if __name__ == "__main__":
 
     startup()
