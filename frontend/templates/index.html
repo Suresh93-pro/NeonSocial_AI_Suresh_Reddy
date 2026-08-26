@@ -2059,8 +2059,402 @@
 ====================================================== -->
 
 <script
-    src="{{ url_for('static', filename='app.js') }}"
+    src="{{ url_for('static', filename='app.js') }}?v=20260826final"
 ></script>
+<script>
+/* ============================================================
+   NEONSOCIAL - FORGOT ACCESS KEY FIX
+   Independent handler - does not modify existing app.js
+   ============================================================ */
+
+(function () {
+
+    function initForgotAccessKey() {
+
+        const forgotButton =
+            document.getElementById("forgotPasswordBtn");
+
+        const panel =
+            document.getElementById("resetPasswordPanel");
+
+        const resetEmail =
+            document.getElementById("resetEmail");
+
+        const newPassword =
+            document.getElementById("resetNewPassword");
+
+        const confirmPassword =
+            document.getElementById("resetConfirmPassword");
+
+        const resetButton =
+            document.getElementById("resetPasswordBtn");
+
+        const message =
+            document.getElementById("resetPasswordMessage");
+
+        const loginEmail =
+            document.getElementById("loginUsername");
+
+
+        console.log(
+            "NeonSocial Forgot Password:",
+            {
+                forgotButton: !!forgotButton,
+                panel: !!panel,
+                resetEmail: !!resetEmail,
+                newPassword: !!newPassword,
+                confirmPassword: !!confirmPassword,
+                resetButton: !!resetButton,
+                message: !!message
+            }
+        );
+
+
+        if (!forgotButton || !panel) {
+
+            console.error(
+                "NeonSocial: Forgot Password elements not found."
+            );
+
+            return;
+        }
+
+
+        /* ========================================================
+           FORCE CORRECT BUTTON APPEARANCE
+           ======================================================== */
+
+        forgotButton.style.background = "transparent";
+        forgotButton.style.border = "none";
+        forgotButton.style.color = "#00f5ff";
+        forgotButton.style.cursor = "pointer";
+        forgotButton.style.fontSize = "14px";
+        forgotButton.style.fontWeight = "700";
+        forgotButton.style.letterSpacing = "0.5px";
+        forgotButton.style.padding = "12px 20px";
+        forgotButton.style.textTransform = "uppercase";
+
+
+        /* ========================================================
+           FORGOT BUTTON
+           ======================================================== */
+
+        forgotButton.onclick = function (event) {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            const isHidden =
+                getComputedStyle(panel).display === "none";
+
+            if (isHidden) {
+
+                panel.style.display = "block";
+
+                /* Copy login email automatically */
+
+                if (
+                    loginEmail &&
+                    resetEmail &&
+                    loginEmail.value.trim()
+                ) {
+
+                    resetEmail.value =
+                        loginEmail.value.trim();
+
+                }
+
+                if (message) {
+
+                    message.textContent = "";
+                    message.classList.remove("show");
+
+                }
+
+                setTimeout(function () {
+
+                    if (resetEmail) {
+                        resetEmail.focus();
+                    }
+
+                }, 100);
+
+            } else {
+
+                panel.style.display = "none";
+
+            }
+
+        };
+
+
+        /* ========================================================
+           RESET PASSWORD
+           ======================================================== */
+
+        if (resetButton) {
+
+            resetButton.onclick = async function (event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+
+                const email =
+                    resetEmail.value.trim().toLowerCase();
+
+                const password =
+                    newPassword.value;
+
+                const confirm =
+                    confirmPassword.value;
+
+
+                if (message) {
+
+                    message.textContent = "";
+                    message.classList.remove("show");
+
+                }
+
+
+                /* EMAIL */
+
+                if (!email) {
+
+                    message.textContent =
+                        "Enter your registered email.";
+
+                    message.classList.add("show");
+
+                    resetEmail.focus();
+
+                    return;
+
+                }
+
+
+                /* PASSWORD */
+
+                if (password.length < 8) {
+
+                    message.textContent =
+                        "Password must contain at least 8 characters.";
+
+                    message.classList.add("show");
+
+                    newPassword.focus();
+
+                    return;
+
+                }
+
+
+                /* CONFIRM PASSWORD */
+
+                if (password !== confirm) {
+
+                    message.textContent =
+                        "Passwords do not match.";
+
+                    message.classList.add("show");
+
+                    confirmPassword.focus();
+
+                    return;
+
+                }
+
+
+                const originalHTML =
+                    resetButton.innerHTML;
+
+
+                resetButton.disabled = true;
+
+                resetButton.innerHTML =
+                    "<span>RESETTING...</span>";
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            "/api/auth/reset-password",
+                            {
+                                method: "POST",
+
+                                credentials: "include",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json",
+
+                                    "Accept":
+                                        "application/json"
+                                },
+
+                                body:
+                                    JSON.stringify({
+
+                                        email:
+                                            email,
+
+                                        new_password:
+                                            password,
+
+                                        confirm_password:
+                                            confirm
+
+                                    })
+                            }
+                        );
+
+
+                    let data = {};
+
+                    try {
+
+                        data =
+                            await response.json();
+
+                    } catch (error) {
+
+                        data = {};
+
+                    }
+
+
+                    /* SUCCESS */
+
+                    if (
+                        response.ok &&
+                        data.success === true
+                    ) {
+
+                        message.style.color =
+                            "#00f5b0";
+
+                        message.textContent =
+                            data.message ||
+                            "Password reset successfully. You can now login.";
+
+                        message.classList.add("show");
+
+
+                        /* Put email back in login */
+
+                        if (loginEmail) {
+
+                            loginEmail.value =
+                                email;
+
+                        }
+
+
+                        /* Put new password in login */
+
+                        const loginPassword =
+                            document.getElementById(
+                                "loginPassword"
+                            );
+
+                        if (loginPassword) {
+
+                            loginPassword.value =
+                                password;
+
+                        }
+
+
+                        setTimeout(function () {
+
+                            panel.style.display =
+                                "none";
+
+                            message.textContent =
+                                "";
+
+                            message.classList.remove(
+                                "show"
+                            );
+
+                        }, 1800);
+
+
+                        return;
+
+                    }
+
+
+                    /* BACKEND ERROR */
+
+                    message.style.color =
+                        "#ff4f9a";
+
+                    message.textContent =
+                        data.error ||
+                        data.message ||
+                        "Unable to reset password.";
+
+                    message.classList.add("show");
+
+
+                } catch (error) {
+
+                    console.error(
+                        "NeonSocial reset error:",
+                        error
+                    );
+
+
+                    message.style.color =
+                        "#ff4f9a";
+
+                    message.textContent =
+                        "Unable to connect to NeonSocial AI server.";
+
+                    message.classList.add("show");
+
+                } finally {
+
+                    resetButton.disabled =
+                        false;
+
+                    resetButton.innerHTML =
+                        originalHTML;
+
+                }
+
+            };
+
+        }
+
+    }
+
+
+    /* ============================================================
+       WAIT FOR PAGE
+       ============================================================ */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initForgotAccessKey
+        );
+
+    } else {
+
+        initForgotAccessKey();
+
+    }
+
+})();
+</script>
 
 
 <!-- ======================================================
