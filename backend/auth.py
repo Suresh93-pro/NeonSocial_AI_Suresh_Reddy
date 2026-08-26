@@ -13,6 +13,20 @@ from flask import session, jsonify, redirect
 
 
 # ============================================================
+# OPTIONAL POSTGRESQL DRIVER
+# ============================================================
+
+try:
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+    POSTGRES_AVAILABLE = True
+except ImportError:
+    psycopg2 = None
+    RealDictCursor = None
+    POSTGRES_AVAILABLE = False
+
+
+# ============================================================
 # DATABASE
 # ============================================================
 
@@ -27,12 +41,40 @@ DATABASE_FILE = os.path.join(
     "neonsocial_users.db"
 )
 
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    ""
+).strip()
+
+USE_POSTGRES = bool(
+    DATABASE_URL
+)
+
 
 # ============================================================
 # DATABASE CONNECTION
 # ============================================================
 
 def get_db():
+
+    # --------------------------------------------------------
+    # RENDER / POSTGRESQL
+    # --------------------------------------------------------
+
+    if USE_POSTGRES:
+
+        if not POSTGRES_AVAILABLE:
+            raise RuntimeError(
+                "psycopg2-binary is not installed."
+            )
+
+        return psycopg2.connect(
+            DATABASE_URL
+        )
+
+    # --------------------------------------------------------
+    # LOCAL / SQLITE
+    # --------------------------------------------------------
 
     connection = sqlite3.connect(
         DATABASE_FILE
@@ -44,6 +86,15 @@ def get_db():
 
 
 # ============================================================
+# DATABASE TYPE
+# ============================================================
+
+def using_postgres():
+
+    return USE_POSTGRES
+
+
+# ============================================================
 # INITIALIZE DATABASE
 # ============================================================
 
@@ -51,50 +102,77 @@ def init_auth_database():
 
     connection = get_db()
 
-    cursor = connection.cursor()
+    try:
 
-    cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS users (
+        if using_postgres():
 
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            cursor = connection.cursor()
 
-            name TEXT NOT NULL DEFAULT '',
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS users (
 
-            email TEXT NOT NULL UNIQUE,
+                    id SERIAL PRIMARY KEY,
 
-            password_hash TEXT NOT NULL,
+                    name TEXT NOT NULL DEFAULT '',
 
-            created_at TEXT NOT NULL
-        )
-        """
-    )
+                    email TEXT NOT NULL UNIQUE,
 
-    # --------------------------------------------------------
-    # MIGRATE OLD DATABASE
-    # --------------------------------------------------------
+                    password_hash TEXT NOT NULL,
 
-    cursor.execute(
-        "PRAGMA table_info(users)"
-    )
+                    created_at TEXT NOT NULL
+                )
+                """
+            )
 
-    columns = [
-        row["name"]
-        for row in cursor.fetchall()
-    ]
+            connection.commit()
 
-    if "name" not in columns:
+            cursor.close()
 
-        cursor.execute(
-            """
-            ALTER TABLE users
-            ADD COLUMN name TEXT NOT NULL DEFAULT ''
-            """
-        )
+        else:
 
-    connection.commit()
+            cursor = connection.cursor()
 
-    connection.close()
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS users (
+
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+                    name TEXT NOT NULL DEFAULT '',
+
+                    email TEXT NOT NULL UNIQUE,
+
+                    password_hash TEXT NOT NULL,
+
+                    created_at TEXT NOT NULL
+                )
+                """
+            )
+
+            cursor.execute(
+                "PRAGMA table_info(users)"
+            )
+
+            columns = [
+                row["name"]
+                for row in cursor.fetchall()
+            ]
+
+            if "name" not in columns:
+
+                cursor.execute(
+                    """
+                    ALTER TABLE users
+                    ADD COLUMN name TEXT NOT NULL DEFAULT ''
+                    """
+                )
+
+            connection.commit()
+
+    finally:
+
+        connection.close()
 
 
 # ============================================================
@@ -179,52 +257,100 @@ def verify_password(
     except Exception:
 
         return False
+
+
 # ============================================================
 # RESET PASSWORD
 # ============================================================
 
-def reset_password(email, new_password):
-    email = normalize_email(email)
+def reset_password(
+    email,
+    new_password
+):
+
+    email = normalize_email(
+        email
+    )
 
     if not email:
+
         return False, "Email is required."
 
     if not new_password:
+
         return False, "Password is required."
 
     if len(new_password) < 8:
-        return False, "Password must contain at least 8 characters."
 
-    password_hash = hash_password(new_password)
-
-    connection = get_db()
-    cursor = connection.cursor()
-
-    try:
-        cursor.execute(
-            """
-            UPDATE users
-            SET password_hash = ?
-            WHERE email = ?
-            """,
-            (
-                password_hash,
-                email
-            )
+        return False, (
+            "Password must contain at least 8 characters."
         )
 
+    password_hash = hash_password(
+        new_password
+    )
+
+    connection = get_db()
+
+    try:
+
+        if using_postgres():
+
+            cursor = connection.cursor()
+
+            cursor.execute(
+                """
+                UPDATE users
+                SET password_hash = %s
+                WHERE email = %s
+                """,
+                (
+                    password_hash,
+                    email
+                )
+            )
+
+        else:
+
+            cursor = connection.cursor()
+
+            cursor.execute(
+                """
+                UPDATE users
+                SET password_hash = ?
+                WHERE email = ?
+                """,
+                (
+                    password_hash,
+                    email
+                )
+            )
+
         if cursor.rowcount == 0:
-            return False, "No account found with this email."
+
+            return False, (
+                "No account found with this email."
+            )
 
         connection.commit()
 
-        return True, "Password reset successfully."
+        return True, (
+            "Password reset successfully."
+        )
 
     except Exception as error:
-        print("Password reset error:", error)
-        return False, "Unable to reset password."
+
+        print(
+            "Password reset error:",
+            error
+        )
+
+        return False, (
+            "Unable to reset password."
+        )
 
     finally:
+
         connection.close()
 
 
@@ -272,7 +398,9 @@ def create_user(
 
     if "@" not in email:
 
-        return False, "Enter a valid email address."
+        return False, (
+            "Enter a valid email address."
+        )
 
     # --------------------------------------------------------
     # PASSWORD VALIDATION
@@ -304,32 +432,70 @@ def create_user(
 
     connection = get_db()
 
-    cursor = connection.cursor()
-
     try:
 
-        cursor.execute(
-            """
-            INSERT INTO users
-            (
-                name,
-                email,
-                password_hash,
-                created_at
+        if using_postgres():
+
+            cursor = connection.cursor(
+                cursor_factory=RealDictCursor
             )
-            VALUES (?, ?, ?, ?)
-            """,
-            (
-                name,
-                email,
-                password_hash,
-                created_at
+
+            cursor.execute(
+                """
+                INSERT INTO users
+                (
+                    name,
+                    email,
+                    password_hash,
+                    created_at
+                )
+                VALUES
+                (
+                    %s,
+                    %s,
+                    %s,
+                    %s
+                )
+                RETURNING id
+                """,
+                (
+                    name,
+                    email,
+                    password_hash,
+                    created_at
+                )
             )
-        )
+
+            row = cursor.fetchone()
+
+            user_id = row["id"]
+
+        else:
+
+            cursor = connection.cursor()
+
+            cursor.execute(
+                """
+                INSERT INTO users
+                (
+                    name,
+                    email,
+                    password_hash,
+                    created_at
+                )
+                VALUES (?, ?, ?, ?)
+                """,
+                (
+                    name,
+                    email,
+                    password_hash,
+                    created_at
+                )
+            )
+
+            user_id = cursor.lastrowid
 
         connection.commit()
-
-        user_id = cursor.lastrowid
 
         return True, {
 
@@ -346,10 +512,30 @@ def create_user(
                 created_at
         }
 
-    except sqlite3.IntegrityError:
+    except Exception as error:
+
+        connection.rollback()
+
+        error_text = str(
+            error
+        ).lower()
+
+        if (
+            "unique" in error_text
+            or "duplicate" in error_text
+        ):
+
+            return False, (
+                "An account with this email already exists."
+            )
+
+        print(
+            "Create user error:",
+            error
+        )
 
         return False, (
-            "An account with this email already exists."
+            "Unable to create account."
         )
 
     finally:
@@ -372,25 +558,55 @@ def authenticate_user(
 
     connection = get_db()
 
-    cursor = connection.cursor()
+    try:
 
-    cursor.execute(
-        """
-        SELECT
-            id,
-            name,
-            email,
-            password_hash,
-            created_at
-        FROM users
-        WHERE email = ?
-        """,
-        (email,)
-    )
+        if using_postgres():
 
-    user = cursor.fetchone()
+            cursor = connection.cursor(
+                cursor_factory=RealDictCursor
+            )
 
-    connection.close()
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    name,
+                    email,
+                    password_hash,
+                    created_at
+                FROM users
+                WHERE email = %s
+                """,
+                (
+                    email,
+                )
+            )
+
+        else:
+
+            cursor = connection.cursor()
+
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    name,
+                    email,
+                    password_hash,
+                    created_at
+                FROM users
+                WHERE email = ?
+                """,
+                (
+                    email,
+                )
+            )
+
+        user = cursor.fetchone()
+
+    finally:
+
+        connection.close()
 
     if not user:
 
@@ -417,6 +633,8 @@ def authenticate_user(
         "created_at":
             user["created_at"]
     }
+
+
 # ============================================================
 # RESET USER PASSWORD
 # ============================================================
@@ -425,66 +643,11 @@ def reset_user_password(
     email,
     new_password
 ):
-    email = normalize_email(
-        email
-    )
 
-    if not email:
-        return False, "Email is required."
-
-    if not new_password:
-        return False, "New password is required."
-
-    if len(new_password) < 8:
-        return False, (
-            "Password must contain at least 8 characters."
-        )
-
-    password_hash = hash_password(
+    return reset_password(
+        email,
         new_password
     )
-
-    connection = get_db()
-    cursor = connection.cursor()
-
-    try:
-        cursor.execute(
-            """
-            UPDATE users
-            SET password_hash = ?
-            WHERE email = ?
-            """,
-            (
-                password_hash,
-                email
-            )
-        )
-
-        if cursor.rowcount == 0:
-            return False, (
-                "No account was found with this email."
-            )
-
-        connection.commit()
-
-        return True, (
-            "Password updated successfully."
-        )
-
-    except Exception as error:
-
-        print(
-            "Password reset error:",
-            error
-        )
-
-        return False, (
-            "Unable to reset password."
-        )
-
-    finally:
-
-        connection.close()
 
 
 # ============================================================
@@ -503,24 +666,53 @@ def get_current_user():
 
     connection = get_db()
 
-    cursor = connection.cursor()
+    try:
 
-    cursor.execute(
-        """
-        SELECT
-            id,
-            name,
-            email,
-            created_at
-        FROM users
-        WHERE id = ?
-        """,
-        (user_id,)
-    )
+        if using_postgres():
 
-    user = cursor.fetchone()
+            cursor = connection.cursor(
+                cursor_factory=RealDictCursor
+            )
 
-    connection.close()
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    name,
+                    email,
+                    created_at
+                FROM users
+                WHERE id = %s
+                """,
+                (
+                    user_id,
+                )
+            )
+
+        else:
+
+            cursor = connection.cursor()
+
+            cursor.execute(
+                """
+                SELECT
+                    id,
+                    name,
+                    email,
+                    created_at
+                FROM users
+                WHERE id = ?
+                """,
+                (
+                    user_id,
+                )
+            )
+
+        user = cursor.fetchone()
+
+    finally:
+
+        connection.close()
 
     if not user:
 
@@ -551,22 +743,18 @@ def get_current_user():
 def login_user(user):
 
     # Completely reset the previous browser session.
-    # This is important because another user may have used
-    # this browser before.
 
     session.clear()
 
-    # NeonSocial user identity
     session["user_id"] = user["id"]
 
     session["user_email"] = user["email"]
 
     if user.get("name"):
+
         session["user_name"] = user["name"]
 
-    # IMPORTANT:
-    # Never carry another user's LinkedIn connection
-    # into this user's session.
+    # Never carry another user's LinkedIn connection.
 
     session.pop(
         "linkedin_access_token",
@@ -604,7 +792,11 @@ def logout_user():
 def login_required_api(function):
 
     @wraps(function)
-    def wrapper(*args, **kwargs):
+
+    def wrapper(
+        *args,
+        **kwargs
+    ):
 
         user = get_current_user()
 
@@ -620,6 +812,7 @@ def login_required_api(function):
 
                 "error":
                     "Login required."
+
             }), 401
 
         return function(
@@ -637,7 +830,11 @@ def login_required_api(function):
 def login_required_page(function):
 
     @wraps(function)
-    def wrapper(*args, **kwargs):
+
+    def wrapper(
+        *args,
+        **kwargs
+    ):
 
         user = get_current_user()
 
