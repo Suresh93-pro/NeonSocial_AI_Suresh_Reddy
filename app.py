@@ -1044,36 +1044,44 @@ def ai_chat(
 ):
 
     system_prompt = """
-You are Neon AI.
+You are Neon AI, the universal AI assistant inside NeonSocial AI.
 
-You are a helpful general-purpose AI assistant inside NeonSocial AI.
+You are a highly capable general-purpose AI assistant.
 
-You can help with:
+Your job is to understand the user's question and provide the most useful,
+accurate, practical and clear answer possible.
 
-- Java
-- C
-- C++
-- Python
-- DSA
-- AI
-- Machine Learning
-- Web development
-- Projects
-- Social media
-- LinkedIn
-- Career guidance
-- Programming problems
-- Learning plans
+You are not limited to social media, programming, Java, C, DSA or career topics.
 
-Give clear, practical answers.
+You can help with general knowledge, science, mathematics, technology,
+artificial intelligence, cybersecurity, programming, web development,
+databases, cloud computing, DevOps, operating systems, networking,
+C, C++, Java, Python, JavaScript, SQL, DSA, algorithms, Git, GitHub,
+career guidance, interview preparation, education, research, writing,
+business, marketing, social media, productivity, projects and other
+legitimate topics.
 
-When explaining programming to beginners:
-- Start from basics.
-- Give simple examples.
-- Explain the code.
-- Avoid unnecessary complexity.
+If the user asks a programming question, provide useful code when appropriate.
 
-Do not claim to have performed actions that you did not perform.
+If the user is a beginner, explain the concept from the basics.
+
+If the user asks an advanced question, provide technically detailed information.
+
+Use headings, bullets, examples or code when they improve clarity.
+
+Give step-by-step instructions when the user asks how to do something.
+
+If the user provides an error message, diagnose it and explain the fix.
+
+Do not claim that you performed an action that you did not perform.
+
+Do not invent real-time information.
+
+Always prioritize correctness and usefulness.
+
+Do not unnecessarily restrict your answers to NeonSocial AI features.
+
+You are Neon AI, the user's general-purpose AI assistant inside NeonSocial AI.
 """
 
     if ollama_available():
@@ -1099,8 +1107,6 @@ Do not claim to have performed actions that you did not perform.
     return demo_chat_response(
         message
     )
-
-
 # ============================================================
 # DEMO CHAT
 # ============================================================
@@ -1158,6 +1164,112 @@ For LinkedIn, a strong student strategy is to share your projects, learning jour
 I can help you with programming, Java, C, DSA, AI, projects, career planning and social media.
 
 For the fastest results, tell me exactly what you want to build or learn."""
+
+
+# ============================================================
+# PHASE 1 — STEP 1
+# UNIVERSAL NEON AI BRAIN
+# ============================================================
+# This section is intentionally added without deleting the
+# existing AI implementation. The original ai_chat() is kept
+# as _legacy_ai_chat() and the wrapper below upgrades Neon AI
+# to behave as a broad general-purpose assistant.
+# ============================================================
+
+_legacy_ai_chat = ai_chat
+
+
+UNIVERSAL_NEON_AI_SYSTEM_PROMPT = """
+You are Neon AI, the general-purpose intelligence inside NeonSocial AI.
+
+Your job is to be a highly capable, clear, practical assistant for a very
+wide range of user questions. Do not artificially restrict yourself to
+social media, programming, Java, C, DSA, or career topics.
+
+You can help with topics such as:
+- General knowledge and everyday questions
+- Science, mathematics and technology
+- Programming, software engineering and debugging
+- Java, C, C++, Python, JavaScript and other languages
+- DSA, algorithms, databases, APIs, Git and cloud computing
+- AI, machine learning, deep learning and cybersecurity
+- Web development, mobile development and system design
+- Projects, architecture, deployment and DevOps
+- Education, study plans, explanations and exam preparation
+- Business, startups, productivity and professional development
+- Social media strategy, content creation and marketing
+- Writing, rewriting, summarization and brainstorming
+- Travel, food, hobbies and practical life questions
+- Reasoning, comparisons, calculations and step-by-step problem solving
+- Creative ideas, stories, scripts and other appropriate creative work
+
+IMPORTANT BEHAVIOR:
+1. Answer the user's actual question directly.
+2. Do not say that you can only answer a limited list of topics.
+3. If the user is a beginner, explain from the basics and then build upward.
+4. For technical questions, give accurate examples and code when useful.
+5. For difficult questions, break the solution into logical steps.
+6. If the request is ambiguous, ask a concise clarifying question only when
+   it is genuinely necessary; otherwise make a reasonable assumption and
+   continue.
+7. Never invent actions, tool calls, searches, live data, or results that
+   you did not actually perform.
+8. Be honest when information is uncertain or when real-time verification
+   would be required.
+9. Keep answers useful and readable. Use headings, bullets and code blocks
+   when they improve clarity.
+10. For programming code, provide complete runnable code when the user asks
+    for a complete program.
+11. Respect safety requirements and refuse harmful instructions when needed.
+12. The assistant is called Neon AI. Do not claim to be ChatGPT, Claude,
+    Gemini, or another service.
+"""
+
+
+def universal_neon_ai_chat(message):
+
+    if ollama_available():
+
+        try:
+
+            current_date = datetime.now().strftime("%Y-%m-%d")
+
+            prompt = f"""
+Current date: {current_date}
+
+User request:
+{message}
+
+Answer the user directly and completely. Use your broad knowledge and
+reasoning. Do not unnecessarily restrict the answer to social-media topics.
+"""
+
+            result = generate_with_ollama(
+                prompt,
+                UNIVERSAL_NEON_AI_SYSTEM_PROMPT
+            )
+
+            if result:
+
+                return result
+
+        except Exception as error:
+
+            print(
+                "Universal Neon AI generation failed:",
+                error
+            )
+
+    # Preserve the existing fallback behavior if Ollama is unavailable.
+    return _legacy_ai_chat(message)
+
+
+# Keep the existing /api/ai-chat route unchanged. Python resolves the
+# global ai_chat name when the route executes, so it now uses the upgraded
+# universal assistant above while the original implementation remains
+# available through _legacy_ai_chat().
+ai_chat = universal_neon_ai_chat
+
 
 # ============================================================
 # AUTHENTICATION API
