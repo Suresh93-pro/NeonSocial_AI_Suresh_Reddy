@@ -3127,249 +3127,7 @@ startup();
     loadProfileUser();
 
 })();
-// ============================================================
-// FORGOT PASSWORD
-// ============================================================
 
-(function initForgotPassword() {
-
-    const forgotBtn =
-        document.getElementById("forgotPasswordBtn");
-
-    const panel =
-        document.getElementById("resetPasswordPanel");
-
-    const resetBtn =
-        document.getElementById("resetPasswordBtn");
-
-    const email =
-        document.getElementById("resetEmail");
-
-    const newPassword =
-        document.getElementById("resetNewPassword");
-
-    const confirmPassword =
-        document.getElementById("resetConfirmPassword");
-
-    const message =
-        document.getElementById("resetPasswordMessage");
-
-    if (
-        !forgotBtn ||
-        !panel ||
-        !resetBtn
-    ) {
-        return;
-    }
-
-    forgotBtn.addEventListener(
-        "click",
-        function () {
-
-            panel.style.display =
-                panel.style.display === "none"
-                    ? "block"
-                    : "none";
-
-            if (panel.style.display === "block") {
-
-                email.value = "";
-
-                newPassword.value = "";
-
-                confirmPassword.value = "";
-
-                message.textContent = "";
-
-                message.classList.remove("show");
-
-                email.focus();
-            }
-        }
-    );
-
-
-    resetBtn.addEventListener(
-        "click",
-        async function () {
-
-            const emailValue =
-                email.value.trim();
-
-            const newPasswordValue =
-                newPassword.value;
-
-            const confirmPasswordValue =
-                confirmPassword.value;
-
-
-            message.textContent = "";
-
-            message.classList.remove("show");
-
-
-            if (!emailValue) {
-
-                message.textContent =
-                    "Enter your registered email.";
-
-                message.classList.add("show");
-
-                email.focus();
-
-                return;
-            }
-
-
-            if (newPasswordValue.length < 8) {
-
-                message.textContent =
-                    "Password must contain at least 8 characters.";
-
-                message.classList.add("show");
-
-                newPassword.focus();
-
-                return;
-            }
-
-
-            if (
-                newPasswordValue !==
-                confirmPasswordValue
-            ) {
-
-                message.textContent =
-                    "Passwords do not match.";
-
-                message.classList.add("show");
-
-                confirmPassword.focus();
-
-                return;
-            }
-
-
-            const originalHTML =
-                resetBtn.innerHTML;
-
-            resetBtn.disabled = true;
-
-            resetBtn.innerHTML =
-                "<span>RESETTING...</span>";
-
-
-            try {
-
-                const response =
-                    await fetch(
-                        "/api/auth/reset-password",
-                        {
-                            method: "POST",
-
-                            credentials: "include",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json",
-
-                                "Accept":
-                                    "application/json"
-                            },
-
-                            body: JSON.stringify({
-
-                                email:
-                                    emailValue,
-
-                                new_password:
-                                    newPasswordValue,
-
-                                confirm_password:
-                                    confirmPasswordValue
-                            })
-                        }
-                    );
-
-
-                const data =
-                    await response.json();
-
-
-                if (
-                    response.ok &&
-                    data.success === true
-                ) {
-
-                    message.textContent =
-                        "✓ Password reset successfully. You can now login.";
-
-                    message.classList.add("show");
-
-                    newPassword.value = "";
-
-                    confirmPassword.value = "";
-
-                    setTimeout(
-                        function () {
-
-                            panel.style.display =
-                                "none";
-
-                            message.textContent =
-                                "";
-
-                            message.classList.remove(
-                                "show"
-                            );
-
-                            document
-                                .getElementById(
-                                    "loginPassword"
-                                )
-                                ?.focus();
-
-                        },
-                        2200
-                    );
-
-                    return;
-                }
-
-
-                message.textContent =
-                    data.error ||
-                    "Unable to reset password.";
-
-                message.classList.add("show");
-
-
-            } catch (error) {
-
-                console.error(
-                    "Password reset error:",
-                    error
-                );
-
-                message.textContent =
-                    "Unable to connect to NeonSocial AI server.";
-
-                message.classList.add("show");
-
-
-            } finally {
-
-                resetBtn.disabled =
-                    false;
-
-                resetBtn.innerHTML =
-                    originalHTML;
-            }
-
-        }
-    );
-
-})();
 /* ============================================================
    NEONSOCIAL AI
    FINAL AUTHENTICATION FIX
@@ -4177,10 +3935,8 @@ startup();
             );
 
 
-        const resetEmail =
-            neonGet(
-                "resetEmail"
-            );
+        const email =
+    document.getElementById("resetEmail");
 
 
         const loginEmail =
@@ -4843,6 +4599,1769 @@ startup();
     else {
 
         installFinalFix();
+
+    }
+
+})();
+/* ============================================================
+   NEONSOCIAL FINAL AUTH COMPATIBILITY FIX
+   - Existing account login
+   - Forgot Access Key
+   - Password reset
+   - Does NOT disturb existing application features
+   ============================================================ */
+
+(function NeonSocialFinalAuthFix() {
+
+    function init() {
+
+        console.log("NeonSocial Final Auth Fix loaded.");
+
+        /* =====================================================
+           LOGIN
+           ===================================================== */
+
+        const loginButton =
+            document.getElementById("loginButton");
+
+        const loginEmail =
+            document.getElementById("loginUsername");
+
+        const loginPassword =
+            document.getElementById("loginPassword");
+
+        const loginError =
+            document.getElementById("loginError");
+
+
+        if (loginButton && loginEmail && loginPassword) {
+
+            /*
+             * Do not replace the existing login handler.
+             * Only make sure Enter key works.
+             */
+
+            loginEmail.addEventListener(
+                "keydown",
+                function(event) {
+
+                    if (event.key === "Enter") {
+
+                        event.preventDefault();
+
+                        loginButton.click();
+
+                    }
+
+                }
+            );
+
+            loginPassword.addEventListener(
+                "keydown",
+                function(event) {
+
+                    if (event.key === "Enter") {
+
+                        event.preventDefault();
+
+                        loginButton.click();
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           FORGOT ACCESS KEY
+           ===================================================== */
+
+        let forgotButton =
+            document.getElementById(
+                "forgotPasswordBtn"
+            );
+
+
+        /*
+         * If the button does not exist, do nothing.
+         */
+
+        if (!forgotButton) {
+
+            console.warn(
+                "NeonSocial: forgotPasswordBtn not found."
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * Prevent duplicate event handlers.
+         */
+
+        if (
+            forgotButton.dataset.neonFinalBound === "true"
+        ) {
+
+            return;
+
+        }
+
+
+        forgotButton.dataset.neonFinalBound =
+            "true";
+
+
+        /* =====================================================
+           FIND / CREATE RESET PANEL
+           ===================================================== */
+
+        let resetPanel =
+            document.getElementById(
+                "resetPasswordPanel"
+            );
+
+
+        /*
+         * If the HTML already has the panel,
+         * use it.
+         *
+         * Otherwise create one automatically.
+         */
+
+        if (!resetPanel) {
+
+            resetPanel =
+                document.createElement("div");
+
+            resetPanel.id =
+                "resetPasswordPanel";
+
+            resetPanel.style.display =
+                "none";
+
+            resetPanel.style.marginTop =
+                "18px";
+
+            resetPanel.style.padding =
+                "20px";
+
+            resetPanel.style.borderRadius =
+                "18px";
+
+            resetPanel.style.background =
+                "rgba(5, 12, 32, 0.95)";
+
+            resetPanel.style.border =
+                "1px solid rgba(0,245,255,.25)";
+
+            resetPanel.style.boxShadow =
+                "0 0 30px rgba(0,245,255,.08)";
+
+
+            resetPanel.innerHTML = `
+
+                <div
+                    style="
+                        color:#00f5ff;
+                        font-size:13px;
+                        font-weight:700;
+                        letter-spacing:2px;
+                        margin-bottom:15px;
+                    "
+                >
+                    RESET ACCESS KEY
+                </div>
+
+
+                <input
+                    id="resetEmail"
+                    type="email"
+                    placeholder="Registered email"
+                    autocomplete="email"
+                    style="
+                        width:100%;
+                        box-sizing:border-box;
+                        margin-bottom:10px;
+                        padding:14px;
+                        border-radius:10px;
+                        border:1px solid rgba(0,245,255,.2);
+                        background:#050b1c;
+                        color:white;
+                        outline:none;
+                    "
+                >
+
+
+                <input
+                    id="resetNewPassword"
+                    type="password"
+                    placeholder="New access key (8+ characters)"
+                    autocomplete="new-password"
+                    style="
+                        width:100%;
+                        box-sizing:border-box;
+                        margin-bottom:10px;
+                        padding:14px;
+                        border-radius:10px;
+                        border:1px solid rgba(0,245,255,.2);
+                        background:#050b1c;
+                        color:white;
+                        outline:none;
+                    "
+                >
+
+
+                <input
+                    id="resetConfirmPassword"
+                    type="password"
+                    placeholder="Confirm new access key"
+                    autocomplete="new-password"
+                    style="
+                        width:100%;
+                        box-sizing:border-box;
+                        margin-bottom:12px;
+                        padding:14px;
+                        border-radius:10px;
+                        border:1px solid rgba(0,245,255,.2);
+                        background:#050b1c;
+                        color:white;
+                        outline:none;
+                    "
+                >
+
+
+                <button
+                    type="button"
+                    id="resetPasswordBtn"
+                    style="
+                        width:100%;
+                        padding:14px;
+                        border:0;
+                        border-radius:10px;
+                        cursor:pointer;
+                        background:linear-gradient(
+                            135deg,
+                            #00f5ff,
+                            #00ff9d
+                        );
+                        color:#00151b;
+                        font-weight:800;
+                        letter-spacing:1px;
+                    "
+                >
+                    RESET ACCESS KEY →
+                </button>
+
+
+                <div
+                    id="resetPasswordMessage"
+                    style="
+                        margin-top:12px;
+                        font-size:13px;
+                        text-align:center;
+                        min-height:18px;
+                    "
+                ></div>
+
+            `;
+
+
+            /*
+             * Put panel immediately after Forgot button.
+             */
+
+            forgotButton.parentNode.insertBefore(
+                resetPanel,
+                forgotButton.nextSibling
+            );
+
+        }
+
+
+        /* =====================================================
+           GET RESET ELEMENTS
+           ===================================================== */
+
+        const resetEmail =
+            document.getElementById(
+                "resetEmail"
+            );
+
+        const resetNewPassword =
+            document.getElementById(
+                "resetNewPassword"
+            );
+
+        const resetConfirmPassword =
+            document.getElementById(
+                "resetConfirmPassword"
+            );
+
+        const resetButton =
+            document.getElementById(
+                "resetPasswordBtn"
+            );
+
+        const resetMessage =
+            document.getElementById(
+                "resetPasswordMessage"
+            );
+
+
+        if (
+            !resetEmail ||
+            !resetNewPassword ||
+            !resetConfirmPassword ||
+            !resetButton ||
+            !resetMessage
+        ) {
+
+            console.error(
+                "NeonSocial: reset elements missing."
+            );
+
+            return;
+
+        }
+
+
+        /* =====================================================
+           FORGOT BUTTON CLICK
+           ===================================================== */
+
+        forgotButton.addEventListener(
+            "click",
+            function(event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+
+                const isHidden =
+                    resetPanel.style.display === "none" ||
+                    resetPanel.style.display === "";
+
+
+                if (isHidden) {
+
+                    resetPanel.style.display =
+                        "block";
+
+
+                    /*
+                     * Automatically use the email
+                     * currently entered in login.
+                     */
+
+                    if (
+                        loginEmail &&
+                        loginEmail.value.trim()
+                    ) {
+
+                        resetEmail.value =
+                            loginEmail.value.trim();
+
+                    }
+
+
+                    resetMessage.textContent =
+                        "";
+
+                    resetNewPassword.value =
+                        "";
+
+                    resetConfirmPassword.value =
+                        "";
+
+
+                    resetEmail.focus();
+
+
+                    /*
+                     * Scroll panel into view.
+                     */
+
+                    setTimeout(
+                        function() {
+
+                            resetPanel.scrollIntoView({
+                                behavior: "smooth",
+                                block: "center"
+                            });
+
+                        },
+                        50
+                    );
+
+                }
+                else {
+
+                    resetPanel.style.display =
+                        "none";
+
+                }
+
+            }
+        );
+
+
+        /* =====================================================
+           RESET PASSWORD
+           ===================================================== */
+
+        resetButton.addEventListener(
+            "click",
+            async function(event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+
+                const email =
+                    resetEmail.value
+                        .trim()
+                        .toLowerCase();
+
+
+                const newPassword =
+                    resetNewPassword.value;
+
+
+                const confirmPassword =
+                    resetConfirmPassword.value;
+
+
+                resetMessage.textContent =
+                    "";
+
+
+                if (!email) {
+
+                    resetMessage.textContent =
+                        "Enter your registered email.";
+
+                    resetEmail.focus();
+
+                    return;
+
+                }
+
+
+                if (newPassword.length < 8) {
+
+                    resetMessage.textContent =
+                        "Password must contain at least 8 characters.";
+
+                    resetNewPassword.focus();
+
+                    return;
+
+                }
+
+
+                if (
+                    newPassword !==
+                    confirmPassword
+                ) {
+
+                    resetMessage.textContent =
+                        "Passwords do not match.";
+
+                    resetConfirmPassword.focus();
+
+                    return;
+
+                }
+
+
+                const originalHTML =
+                    resetButton.innerHTML;
+
+
+                resetButton.disabled =
+                    true;
+
+
+                resetButton.innerHTML =
+                    "RESETTING...";
+
+
+                try {
+
+                    console.log(
+                        "NeonSocial: sending password reset request."
+                    );
+
+
+                    const response =
+                        await fetch(
+                            "/api/auth/reset-password",
+                            {
+                                method: "POST",
+
+                                credentials:
+                                    "include",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json",
+
+                                    "Accept":
+                                        "application/json"
+                                },
+
+                                body:
+                                    JSON.stringify({
+
+                                        email:
+                                            email,
+
+                                        new_password:
+                                            newPassword,
+
+                                        confirm_password:
+                                            confirmPassword
+
+                                    })
+                            }
+                        );
+
+
+                    let data = {};
+
+
+                    try {
+
+                        data =
+                            await response.json();
+
+                    }
+                    catch(error) {
+
+                        console.error(
+                            "Reset response was not JSON:",
+                            error
+                        );
+
+                    }
+
+
+                    console.log(
+                        "Password reset response:",
+                        response.status,
+                        data
+                    );
+
+
+                    if (
+                        response.ok &&
+                        data.success === true
+                    ) {
+
+                        resetMessage.textContent =
+                            "✓ Password reset successfully. You can now login.";
+
+
+                        resetMessage.style.color =
+                            "#00ff9d";
+
+
+                        /*
+                         * Put the email back into
+                         * the login box.
+                         */
+
+                        if (loginEmail) {
+
+                            loginEmail.value =
+                                email;
+
+                        }
+
+
+                        /*
+                         * Put the NEW password
+                         * into login automatically.
+                         */
+
+                        if (loginPassword) {
+
+                            loginPassword.value =
+                                newPassword;
+
+                        }
+
+
+                        resetNewPassword.value =
+                            "";
+
+                        resetConfirmPassword.value =
+                            "";
+
+
+                        /*
+                         * Close reset panel after a short delay.
+                         */
+
+                        setTimeout(
+                            function() {
+
+                                resetPanel.style.display =
+                                    "none";
+
+                                resetMessage.textContent =
+                                    "";
+
+                                resetMessage.style.color =
+                                    "";
+
+                            },
+                            1800
+                        );
+
+
+                        return;
+
+                    }
+
+
+                    resetMessage.textContent =
+                        (
+                            data &&
+                            data.error
+                        )
+                            ? data.error
+                            : "Unable to reset password.";
+
+
+                    resetMessage.style.color =
+                        "#ff4d8d";
+
+
+                }
+                catch(error) {
+
+                    console.error(
+                        "NeonSocial password reset error:",
+                        error
+                    );
+
+
+                    resetMessage.textContent =
+                        "Unable to connect to NeonSocial AI server.";
+
+
+                    resetMessage.style.color =
+                        "#ff4d8d";
+
+                }
+                finally {
+
+                    resetButton.disabled =
+                        false;
+
+                    resetButton.innerHTML =
+                        originalHTML;
+
+                }
+
+            }
+        );
+
+
+        console.log(
+            "NeonSocial: Forgot Access Key is ready."
+        );
+
+    }
+
+
+    /*
+     * DOM READY
+     */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            init
+        );
+
+    }
+    else {
+
+        init();
+
+    }
+
+})();
+/* ============================================================
+   NEONSOCIAL - FORGOT ACCESS KEY FINAL WORKING SYSTEM
+   ============================================================ */
+
+(function () {
+
+    function initForgotAccessKey() {
+
+        /* --------------------------------------------------------
+           FIND FORGOT BUTTON
+           -------------------------------------------------------- */
+
+        let forgotBtn =
+            document.getElementById("forgotPasswordBtn");
+
+        /*
+         * If the ID is missing, find the button by its text.
+         */
+        if (!forgotBtn) {
+
+            const buttons =
+                document.querySelectorAll("button");
+
+            buttons.forEach(function (button) {
+
+                const text =
+                    button.textContent
+                        .trim()
+                        .toUpperCase();
+
+                if (
+                    text.includes("FORGOT ACCESS KEY") ||
+                    text.includes("FORGOT PASSWORD")
+                ) {
+                    forgotBtn = button;
+                }
+
+            });
+
+        }
+
+        if (!forgotBtn) {
+
+            console.warn(
+                "NeonSocial: Forgot Access Key button not found."
+            );
+
+            return;
+
+        }
+
+        /* --------------------------------------------------------
+           REMOVE OLD CLICK HANDLERS
+           -------------------------------------------------------- */
+
+        const cleanButton =
+            forgotBtn.cloneNode(true);
+
+        forgotBtn.parentNode.replaceChild(
+            cleanButton,
+            forgotBtn
+        );
+
+        forgotBtn = cleanButton;
+
+        forgotBtn.id =
+            "forgotPasswordBtn";
+
+        forgotBtn.type =
+            "button";
+
+        /* --------------------------------------------------------
+           FIND OR CREATE RESET PANEL
+           -------------------------------------------------------- */
+
+        let panel =
+            document.getElementById(
+                "resetPasswordPanel"
+            );
+
+        if (!panel) {
+
+            panel =
+                document.createElement("div");
+
+            panel.id =
+                "resetPasswordPanel";
+
+            panel.style.display =
+                "none";
+
+            panel.innerHTML = `
+
+                <div class="neon-reset-box">
+
+                    <div class="neon-reset-title">
+                        RESET ACCESS KEY
+                    </div>
+
+                    <div class="neon-reset-subtitle">
+                        Enter your registered email and create
+                        a new access key.
+                    </div>
+
+                    <input
+                        id="resetEmail"
+                        type="email"
+                        placeholder="Registered email"
+                        autocomplete="email"
+                    >
+
+                    <input
+                        id="resetNewPassword"
+                        type="password"
+                        placeholder="New access key"
+                        autocomplete="new-password"
+                    >
+
+                    <input
+                        id="resetConfirmPassword"
+                        type="password"
+                        placeholder="Confirm new access key"
+                        autocomplete="new-password"
+                    >
+
+                    <button
+                        id="resetPasswordBtn"
+                        type="button"
+                    >
+                        RESET ACCESS KEY
+                        <span>→</span>
+                    </button>
+
+                    <div
+                        id="resetPasswordMessage"
+                    ></div>
+
+                </div>
+
+            `;
+
+            /*
+             * Put panel directly after forgot button.
+             */
+            forgotBtn.parentNode.insertBefore(
+                panel,
+                forgotBtn.nextSibling
+            );
+
+        }
+
+        /* --------------------------------------------------------
+           GET RESET ELEMENTS
+           -------------------------------------------------------- */
+
+        const resetBtn =
+            document.getElementById(
+                "resetPasswordBtn"
+            );
+
+        const email =
+            document.getElementById(
+                "resetEmail"
+            );
+
+        const newPassword =
+            document.getElementById(
+                "resetNewPassword"
+            );
+
+        const confirmPassword =
+            document.getElementById(
+                "resetConfirmPassword"
+            );
+
+        const message =
+            document.getElementById(
+                "resetPasswordMessage"
+            );
+
+        if (
+            !resetBtn ||
+            !email ||
+            !newPassword ||
+            !confirmPassword ||
+            !message
+        ) {
+
+            console.error(
+                "NeonSocial: Reset password elements missing."
+            );
+
+            return;
+
+        }
+
+        /* --------------------------------------------------------
+           FORGOT BUTTON
+           -------------------------------------------------------- */
+
+        forgotBtn.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                const currentlyHidden =
+                    panel.style.display === "none" ||
+                    getComputedStyle(panel).display === "none";
+
+                if (currentlyHidden) {
+
+                    /* OPEN */
+
+                    panel.style.display =
+                        "block";
+
+                    /*
+                     * Automatically use email
+                     * already entered in login.
+                     */
+                    const loginEmail =
+                        document.getElementById(
+                            "loginUsername"
+                        );
+
+                    if (
+                        loginEmail &&
+                        loginEmail.value.trim()
+                    ) {
+
+                        email.value =
+                            loginEmail.value.trim();
+
+                    } else {
+
+                        email.value = "";
+
+                    }
+
+                    newPassword.value = "";
+                    confirmPassword.value = "";
+
+                    message.textContent = "";
+
+                    message.className = "";
+
+                    /*
+                     * Scroll reset panel into view.
+                     */
+                    setTimeout(
+                        function () {
+
+                            panel.scrollIntoView({
+                                behavior: "smooth",
+                                block: "center"
+                            });
+
+                            email.focus();
+
+                        },
+                        100
+                    );
+
+                } else {
+
+                    /* CLOSE */
+
+                    panel.style.display =
+                        "none";
+
+                }
+
+            }
+        );
+
+        /* --------------------------------------------------------
+           RESET PASSWORD
+           -------------------------------------------------------- */
+
+        resetBtn.addEventListener(
+            "click",
+            async function () {
+
+                const emailValue =
+                    email.value.trim();
+
+                const newPasswordValue =
+                    newPassword.value;
+
+                const confirmPasswordValue =
+                    confirmPassword.value;
+
+                message.textContent = "";
+
+                message.className = "";
+
+                /* --------------------------------------------
+                   VALIDATION
+                   -------------------------------------------- */
+
+                if (!emailValue) {
+
+                    message.textContent =
+                        "Enter your registered email.";
+
+                    message.className =
+                        "reset-error";
+
+                    email.focus();
+
+                    return;
+
+                }
+
+                if (
+                    newPasswordValue.length < 8
+                ) {
+
+                    message.textContent =
+                        "Access key must contain at least 8 characters.";
+
+                    message.className =
+                        "reset-error";
+
+                    newPassword.focus();
+
+                    return;
+
+                }
+
+                if (
+                    newPasswordValue !==
+                    confirmPasswordValue
+                ) {
+
+                    message.textContent =
+                        "Access keys do not match.";
+
+                    message.className =
+                        "reset-error";
+
+                    confirmPassword.focus();
+
+                    return;
+
+                }
+
+                /* --------------------------------------------
+                   LOADING
+                   -------------------------------------------- */
+
+                const originalText =
+                    resetBtn.innerHTML;
+
+                resetBtn.disabled =
+                    true;
+
+                resetBtn.innerHTML =
+                    "RESETTING...";
+
+                try {
+
+                    const response =
+                        await fetch(
+                            "/api/auth/reset-password",
+                            {
+                                method: "POST",
+
+                                credentials:
+                                    "include",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json",
+
+                                    "Accept":
+                                        "application/json"
+                                },
+
+                                body:
+                                    JSON.stringify({
+
+                                        email:
+                                            emailValue,
+
+                                        new_password:
+                                            newPasswordValue,
+
+                                        confirm_password:
+                                            confirmPasswordValue
+
+                                    })
+                            }
+                        );
+
+                    let data = {};
+
+                    try {
+
+                        data =
+                            await response.json();
+
+                    } catch {
+
+                        data = {};
+
+                    }
+
+                    /* ----------------------------------------
+                       SUCCESS
+                       ---------------------------------------- */
+
+                    if (
+                        response.ok &&
+                        data.success === true
+                    ) {
+
+                        message.textContent =
+                            "✓ Access key reset successfully.";
+
+                        message.className =
+                            "reset-success";
+
+                        newPassword.value =
+                            "";
+
+                        confirmPassword.value =
+                            "";
+
+                        setTimeout(
+                            function () {
+
+                                panel.style.display =
+                                    "none";
+
+                                message.textContent =
+                                    "";
+
+                                message.className =
+                                    "";
+
+                            },
+                            2500
+                        );
+
+                        return;
+
+                    }
+
+                    /* ----------------------------------------
+                       SERVER ERROR
+                       ---------------------------------------- */
+
+                    message.textContent =
+                        data.error ||
+                        "Unable to reset access key.";
+
+                    message.className =
+                        "reset-error";
+
+                } catch (error) {
+
+                    console.error(
+                        "Reset password error:",
+                        error
+                    );
+
+                    message.textContent =
+                        "Unable to connect to NeonSocial AI server.";
+
+                    message.className =
+                        "reset-error";
+
+                } finally {
+
+                    resetBtn.disabled =
+                        false;
+
+                    resetBtn.innerHTML =
+                        originalText;
+
+                }
+
+            }
+        );
+
+        /* --------------------------------------------------------
+           ENTER KEY SUPPORT
+           -------------------------------------------------------- */
+
+        [email, newPassword, confirmPassword]
+            .forEach(function (input) {
+
+                input.addEventListener(
+                    "keydown",
+                    function (event) {
+
+                        if (
+                            event.key === "Enter"
+                        ) {
+
+                            event.preventDefault();
+
+                            resetBtn.click();
+
+                        }
+
+                    }
+                );
+
+            });
+
+        console.log(
+            "✓ NeonSocial Forgot Access Key system ready."
+        );
+
+    }
+
+
+    /* ------------------------------------------------------------
+       WAIT UNTIL DOM IS READY
+       ------------------------------------------------------------ */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initForgotAccessKey
+        );
+
+    } else {
+
+        initForgotAccessKey();
+
+    }
+
+})();
+/* ============================================================
+   CLOSE RESET PASSWORD PANEL
+   ============================================================ */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        const closeReset =
+            document.getElementById(
+                "closeResetPassword"
+            );
+
+        const resetPanel =
+            document.getElementById(
+                "resetPasswordPanel"
+            );
+
+        if (
+            closeReset &&
+            resetPanel
+        ) {
+
+            closeReset.addEventListener(
+                "click",
+                function () {
+
+                    resetPanel.style.display =
+                        "none";
+
+                }
+            );
+
+        }
+
+    }
+);
+/* ============================================================
+   NEONSOCIAL - FINAL PASSWORD RESET
+   ============================================================ */
+
+(function finalPasswordReset() {
+
+    function setupPasswordReset() {
+
+        const forgotButton =
+            document.getElementById("forgotPasswordBtn");
+
+        const panel =
+            document.getElementById("resetPasswordPanel");
+
+        const resetButton =
+            document.getElementById("resetPasswordBtn");
+
+        const resetEmail =
+            document.getElementById("resetEmail");
+
+        const newPassword =
+            document.getElementById("resetNewPassword");
+
+        const confirmPassword =
+            document.getElementById("resetConfirmPassword");
+
+        const message =
+            document.getElementById("resetPasswordMessage");
+
+        const loginEmail =
+            document.getElementById("loginUsername");
+
+        const loginPassword =
+            document.getElementById("loginPassword");
+
+
+        /*
+         * Make sure the elements actually exist.
+         */
+
+        if (
+            !forgotButton ||
+            !panel ||
+            !resetButton ||
+            !resetEmail ||
+            !newPassword ||
+            !confirmPassword ||
+            !message
+        ) {
+
+            console.warn(
+                "NeonSocial reset elements not found."
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * Prevent duplicate listeners.
+         */
+
+        if (
+            forgotButton.dataset.resetReady === "true"
+        ) {
+
+            return;
+
+        }
+
+        forgotButton.dataset.resetReady = "true";
+
+
+        /*
+         * FORGOT ACCESS KEY
+         */
+
+        forgotButton.addEventListener(
+            "click",
+            function(event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                const hidden =
+                    window.getComputedStyle(panel).display ===
+                    "none";
+
+                if (hidden) {
+
+                    panel.style.display = "block";
+
+                    if (
+                        loginEmail &&
+                        loginEmail.value.trim()
+                    ) {
+
+                        resetEmail.value =
+                            loginEmail.value.trim();
+
+                    }
+
+                    message.textContent = "";
+
+                    message.classList.remove(
+                        "show"
+                    );
+
+                    setTimeout(
+                        function() {
+
+                            panel.scrollIntoView({
+                                behavior: "smooth",
+                                block: "center"
+                            });
+
+                            resetEmail.focus();
+
+                        },
+                        100
+                    );
+
+                }
+                else {
+
+                    panel.style.display = "none";
+
+                }
+
+            }
+        );
+
+
+        /*
+         * RESET PASSWORD
+         */
+
+        resetButton.addEventListener(
+            "click",
+            async function(event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+
+                const email =
+                    resetEmail.value
+                        .trim()
+                        .toLowerCase();
+
+                const password =
+                    newPassword.value;
+
+                const confirm =
+                    confirmPassword.value;
+
+
+                /*
+                 * Clear previous message.
+                 */
+
+                message.textContent = "";
+
+                message.classList.remove(
+                    "show"
+                );
+
+
+                /*
+                 * Validate email.
+                 */
+
+                if (!email) {
+
+                    message.textContent =
+                        "Enter your registered email.";
+
+                    message.classList.add(
+                        "show"
+                    );
+
+                    resetEmail.focus();
+
+                    return;
+
+                }
+
+
+                /*
+                 * Validate password.
+                 */
+
+                if (password.length < 8) {
+
+                    message.textContent =
+                        "Password must contain at least 8 characters.";
+
+                    message.classList.add(
+                        "show"
+                    );
+
+                    newPassword.focus();
+
+                    return;
+
+                }
+
+
+                /*
+                 * Confirm password.
+                 */
+
+                if (password !== confirm) {
+
+                    message.textContent =
+                        "Passwords do not match.";
+
+                    message.classList.add(
+                        "show"
+                    );
+
+                    confirmPassword.focus();
+
+                    return;
+
+                }
+
+
+                /*
+                 * Save original button.
+                 */
+
+                const originalHTML =
+                    resetButton.innerHTML;
+
+
+                /*
+                 * Disable button.
+                 */
+
+                resetButton.disabled =
+                    true;
+
+                resetButton.innerHTML =
+                    "<span>RESETTING...</span><b>◌</b>";
+
+
+                try {
+
+                    console.log(
+                        "NeonSocial: sending password reset request..."
+                    );
+
+
+                    const response =
+                        await fetch(
+                            "/api/auth/reset-password",
+                            {
+
+                                method: "POST",
+
+                                credentials: "include",
+
+                                headers: {
+
+                                    "Content-Type":
+                                        "application/json",
+
+                                    "Accept":
+                                        "application/json"
+
+                                },
+
+                                body:
+                                    JSON.stringify({
+
+                                        email:
+                                            email,
+
+                                        new_password:
+                                            password,
+
+                                        confirm_password:
+                                            confirm
+
+                                    })
+
+                            }
+                        );
+
+
+                    console.log(
+                        "NeonSocial reset response:",
+                        response.status
+                    );
+
+
+                    let data = {};
+
+                    try {
+
+                        data =
+                            await response.json();
+
+                    }
+                    catch(error) {
+
+                        console.error(
+                            "Could not parse reset response:",
+                            error
+                        );
+
+                    }
+
+
+                    console.log(
+                        "NeonSocial reset data:",
+                        data
+                    );
+
+
+                    /*
+                     * SUCCESS
+                     */
+
+                    if (
+                        response.ok &&
+                        data.success === true
+                    ) {
+
+                        message.textContent =
+                            "✓ Password reset successfully. You can now login.";
+
+                        message.classList.add(
+                            "show"
+                        );
+
+
+                        /*
+                         * Put the registered email
+                         * back into the login field.
+                         */
+
+                        if (loginEmail) {
+
+                            loginEmail.value =
+                                email;
+
+                        }
+
+
+                        /*
+                         * Put the NEW password into
+                         * the login password field.
+                         */
+
+                        if (loginPassword) {
+
+                            loginPassword.value =
+                                password;
+
+                        }
+
+
+                        /*
+                         * Clear reset fields.
+                         */
+
+                        newPassword.value =
+                            "";
+
+                        confirmPassword.value =
+                            "";
+
+
+                        /*
+                         * Close reset panel after
+                         * successful reset.
+                         */
+
+                        setTimeout(
+                            function() {
+
+                                panel.style.display =
+                                    "none";
+
+                                message.textContent =
+                                    "";
+
+                                message.classList.remove(
+                                    "show"
+                                );
+
+                                if (loginPassword) {
+
+                                    loginPassword.focus();
+
+                                }
+
+                            },
+                            1800
+                        );
+
+
+                        return;
+
+                    }
+
+
+                    /*
+                     * BACKEND ERROR
+                     */
+
+                    message.textContent =
+                        data.error ||
+                        data.message ||
+                        "Unable to reset password.";
+
+                    message.classList.add(
+                        "show"
+                    );
+
+
+                }
+                catch(error) {
+
+                    console.error(
+                        "NeonSocial password reset error:",
+                        error
+                    );
+
+
+                    message.textContent =
+                        "Unable to connect to NeonSocial AI server.";
+
+                    message.classList.add(
+                        "show"
+                    );
+
+                }
+                finally {
+
+                    resetButton.disabled =
+                        false;
+
+                    resetButton.innerHTML =
+                        originalHTML;
+
+                }
+
+            }
+        );
+
+
+        console.log(
+            "NeonSocial: password reset system ready."
+        );
+
+    }
+
+
+    /*
+     * Wait until DOM is ready.
+     */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            setupPasswordReset
+        );
+
+    }
+    else {
+
+        setupPasswordReset();
 
     }
 

@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html>
 
@@ -12,6 +11,10 @@
 <title>NeonSocial — Login</title>
 
 <style>
+
+/* ============================================================
+   GLOBAL
+   ============================================================ */
 
 * {
     box-sizing: border-box;
@@ -56,6 +59,11 @@ body {
     color: white;
 
 }
+
+
+/* ============================================================
+   MAIN CARD
+   ============================================================ */
 
 .card {
 
@@ -106,6 +114,11 @@ body {
 
 }
 
+
+/* ============================================================
+   LOGO
+   ============================================================ */
+
 .logo {
 
     text-align: center;
@@ -130,6 +143,11 @@ body {
 
 }
 
+
+/* ============================================================
+   LOGIN LABELS
+   ============================================================ */
+
 label {
 
     display: block;
@@ -139,6 +157,11 @@ label {
     color: #cbd5ff;
 
 }
+
+
+/* ============================================================
+   NORMAL INPUTS
+   ============================================================ */
 
 input {
 
@@ -189,6 +212,11 @@ input:focus {
 
 }
 
+
+/* ============================================================
+   LOGIN BUTTON
+   ============================================================ */
+
 button {
 
     width: 100%;
@@ -214,11 +242,26 @@ button {
             #00ff9d
         );
 
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease,
+        opacity .2s ease;
+
 }
 
 button:hover {
 
-    transform: translateY(-1px);
+    transform:
+        translateY(-1px);
+
+    box-shadow:
+        0 0 20px
+        rgba(
+            0,
+            245,
+            255,
+            .20
+        );
 
 }
 
@@ -228,9 +271,18 @@ button:disabled {
 
     cursor: wait;
 
+    transform: none;
+
 }
 
+
+/* ============================================================
+   LOGIN MESSAGE
+   ============================================================ */
+
 .message {
+
+    min-height: 20px;
 
     margin-top: 18px;
 
@@ -238,7 +290,493 @@ button:disabled {
 
     color: #ff6b9d;
 
+    font-size: 14px;
+
 }
+
+
+/* ============================================================
+   FORGOT ACCESS KEY BUTTON
+   ============================================================ */
+
+.forgot-password-btn {
+
+    display: block;
+
+    width: auto;
+
+    margin:
+        18px auto 4px;
+
+    padding:
+        5px 10px;
+
+    border: none;
+
+    background: transparent;
+
+    color: #00f5ff;
+
+    font-family: inherit;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    letter-spacing: .5px;
+
+    cursor: pointer;
+
+    box-shadow: none;
+
+    transition:
+        color .2s ease,
+        text-shadow .2s ease,
+        transform .2s ease;
+
+}
+
+.forgot-password-btn:hover {
+
+    color: #00ffb7;
+
+    text-shadow:
+        0 0 12px
+        rgba(
+            0,
+            245,
+            255,
+            .7
+        );
+
+    transform:
+        translateY(-1px);
+
+    box-shadow: none;
+
+}
+
+
+/* ============================================================
+   RESET PASSWORD PANEL
+   ============================================================ */
+
+.reset-password-panel {
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    margin:
+        18px 0 10px;
+
+    position: relative;
+
+    animation:
+        resetPanelShow
+        .35s
+        ease;
+
+}
+
+@keyframes resetPanelShow {
+
+    from {
+
+        opacity: 0;
+
+        transform:
+            translateY(-12px)
+            scale(.97);
+
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1);
+
+    }
+
+}
+
+
+/* ============================================================
+   RESET CARD
+   ============================================================ */
+
+.reset-password-card {
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 24px;
+
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(
+                8,
+                20,
+                48,
+                .98
+            ),
+            rgba(
+                2,
+                7,
+                22,
+                .98
+            )
+        );
+
+    border:
+        1px solid
+        rgba(
+            0,
+            245,
+            255,
+            .30
+        );
+
+    box-shadow:
+        0 0 25px
+        rgba(
+            0,
+            245,
+            255,
+            .10
+        ),
+        inset 0 0 30px
+        rgba(
+            0,
+            245,
+            255,
+            .025
+        );
+
+    backdrop-filter:
+        blur(20px);
+
+}
+
+
+/* ============================================================
+   RESET ICON
+   ============================================================ */
+
+.reset-icon {
+
+    width: 48px;
+
+    height: 48px;
+
+    margin:
+        0 auto 12px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background:
+        linear-gradient(
+            135deg,
+            #00f5ff,
+            #00ff9d
+        );
+
+    color: #00151b;
+
+    font-size: 25px;
+
+    font-weight: 900;
+
+    box-shadow:
+        0 0 25px
+        rgba(
+            0,
+            245,
+            255,
+            .35
+        );
+
+}
+
+
+/* ============================================================
+   RESET TITLE
+   ============================================================ */
+
+.reset-password-card h3 {
+
+    margin:
+        0 0 7px;
+
+    text-align: center;
+
+    color: #00f5ff;
+
+    font-size: 15px;
+
+    letter-spacing: 2px;
+
+}
+
+.reset-password-card > p {
+
+    margin:
+        0 0 20px;
+
+    text-align: center;
+
+    color: #7f8db3;
+
+    font-size: 12px;
+
+    line-height: 1.6;
+
+}
+
+
+/* ============================================================
+   RESET FIELDS
+   ============================================================ */
+
+.reset-field {
+
+    margin-bottom: 13px;
+
+}
+
+.reset-field label {
+
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: #7180a7;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    letter-spacing: 1.5px;
+
+}
+
+.reset-field input {
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    height: 48px;
+
+    padding:
+        0 14px;
+
+    margin-bottom: 0;
+
+    border-radius: 11px;
+
+    border:
+        1px solid
+        rgba(
+            100,
+            130,
+            190,
+            .25
+        );
+
+    outline: none;
+
+    background:
+        rgba(
+            1,
+            7,
+            22,
+            .95
+        );
+
+    color: white;
+
+    font-family: inherit;
+
+    font-size: 13px;
+
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease;
+
+}
+
+.reset-field input::placeholder {
+
+    color: #52617f;
+
+}
+
+.reset-field input:focus {
+
+    border-color:
+        #00f5ff;
+
+    box-shadow:
+        0 0 15px
+        rgba(
+            0,
+            245,
+            255,
+            .12
+        );
+
+}
+
+
+/* ============================================================
+   RESET BUTTON
+   ============================================================ */
+
+.reset-password-btn {
+
+    width: 100%;
+
+    height: 48px;
+
+    margin-top: 5px;
+
+    padding: 0;
+
+    border: none;
+
+    border-radius: 11px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #00eaff,
+            #00f5a0
+        );
+
+    color: #00151b;
+
+    font-family: inherit;
+
+    font-size: 12px;
+
+    font-weight: 900;
+
+    letter-spacing: 1px;
+
+    cursor: pointer;
+
+}
+
+.reset-password-btn span {
+
+    margin-left: 8px;
+
+    font-size: 17px;
+
+}
+
+.reset-password-btn:hover {
+
+    transform:
+        translateY(-1px);
+
+    box-shadow:
+        0 0 25px
+        rgba(
+            0,
+            245,
+            255,
+            .3
+        );
+
+}
+
+
+/* ============================================================
+   RESET MESSAGE
+   ============================================================ */
+
+.reset-password-message {
+
+    min-height: 18px;
+
+    margin-top: 12px;
+
+    text-align: center;
+
+    font-size: 11px;
+
+    line-height: 1.5;
+
+    color: #ff5c91;
+
+}
+
+
+/* ============================================================
+   CANCEL RESET BUTTON
+   ============================================================ */
+
+.close-reset-btn {
+
+    display: block;
+
+    width: auto;
+
+    margin:
+        12px auto 0;
+
+    padding:
+        5px 10px;
+
+    border: none;
+
+    background: transparent;
+
+    color: #697895;
+
+    font-family: inherit;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    letter-spacing: 1px;
+
+    cursor: pointer;
+
+    box-shadow: none;
+
+}
+
+.close-reset-btn:hover {
+
+    color: white;
+
+    background: transparent;
+
+    box-shadow: none;
+
+}
+
+
+/* ============================================================
+   SIGNUP
+   ============================================================ */
 
 .signup {
 
@@ -264,75 +802,281 @@ button:disabled {
 
 }
 
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (
+    max-width: 500px
+) {
+
+    .card {
+
+        width: 94%;
+
+        padding: 28px 22px;
+
+        border-radius: 22px;
+
+    }
+
+    .logo {
+
+        font-size: 25px;
+
+    }
+
+}
+
 </style>
 
 </head>
 
+
 <body>
+
+
+<!-- ============================================================
+     MAIN LOGIN CARD
+     ============================================================ -->
 
 <div class="card">
 
-<div class="logo">
-NEONSOCIAL AI
+
+    <!-- ========================================================
+         LOGO
+         ======================================================== -->
+
+    <div class="logo">
+        NEONSOCIAL AI
+    </div>
+
+
+    <div class="subtitle">
+        AI Social Media Command Center
+    </div>
+
+
+    <!-- ========================================================
+         LOGIN FORM
+         ======================================================== -->
+
+    <form id="loginForm">
+
+
+        <!-- EMAIL -->
+
+        <label>
+            Email
+        </label>
+
+        <input
+            id="email"
+            type="email"
+            placeholder="Enter your email"
+            autocomplete="email"
+            required
+        >
+
+
+        <!-- PASSWORD -->
+
+        <label>
+            Password
+        </label>
+
+        <input
+            id="password"
+            type="password"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+            required
+        >
+
+
+        <!-- LOGIN BUTTON -->
+
+        <button
+            id="loginButton"
+            type="submit"
+        >
+            LOGIN
+        </button>
+
+    </form>
+
+
+    <!-- ========================================================
+         LOGIN MESSAGE
+         ======================================================== -->
+
+    <div
+        id="message"
+        class="message"
+    ></div>
+
+
+    <!-- ========================================================
+         FORGOT ACCESS KEY
+         ======================================================== -->
+
+    <button
+        type="button"
+        id="forgotPasswordBtn"
+        class="forgot-password-btn"
+    >
+        FORGOT ACCESS KEY?
+    </button>
+
+
+    <!-- ========================================================
+         RESET PASSWORD PANEL
+         ======================================================== -->
+
+    <div
+        id="resetPasswordPanel"
+        class="reset-password-panel"
+        style="display:none;"
+    >
+
+        <div class="reset-password-card">
+
+
+            <!-- RESET ICON -->
+
+            <div class="reset-icon">
+                ↻
+            </div>
+
+
+            <!-- TITLE -->
+
+            <h3>
+                RESET ACCESS KEY
+            </h3>
+
+
+            <p>
+                Enter your registered email and create
+                a new access key.
+            </p>
+
+
+            <!-- REGISTERED EMAIL -->
+
+            <div class="reset-field">
+
+                <label>
+                    REGISTERED EMAIL
+                </label>
+
+                <input
+                    id="resetEmail"
+                    type="email"
+                    placeholder="Enter your email"
+                    autocomplete="email"
+                >
+
+            </div>
+
+
+            <!-- NEW PASSWORD -->
+
+            <div class="reset-field">
+
+                <label>
+                    NEW ACCESS KEY
+                </label>
+
+                <input
+                    id="resetNewPassword"
+                    type="password"
+                    placeholder="Enter new access key"
+                    autocomplete="new-password"
+                >
+
+            </div>
+
+
+            <!-- CONFIRM PASSWORD -->
+
+            <div class="reset-field">
+
+                <label>
+                    CONFIRM ACCESS KEY
+                </label>
+
+                <input
+                    id="resetConfirmPassword"
+                    type="password"
+                    placeholder="Confirm new access key"
+                    autocomplete="new-password"
+                >
+
+            </div>
+
+
+            <!-- RESET BUTTON -->
+
+            <button
+                type="button"
+                id="resetPasswordBtn"
+                class="reset-password-btn"
+            >
+                RESET ACCESS KEY
+                <span>→</span>
+            </button>
+
+
+            <!-- RESET MESSAGE -->
+
+            <div
+                id="resetPasswordMessage"
+                class="reset-password-message"
+            ></div>
+
+
+            <!-- CANCEL -->
+
+            <button
+                type="button"
+                id="closeResetPassword"
+                class="close-reset-btn"
+            >
+                CANCEL
+            </button>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================
+         SIGNUP
+         ======================================================== -->
+
+    <div class="signup">
+
+        Don't have an account?
+
+        <a href="/signup">
+            Create account
+        </a>
+
+    </div>
+
+
 </div>
 
-<div class="subtitle">
-AI Social Media Command Center
-</div>
-
-<form id="loginForm">
-
-<label>
-Email
-</label>
-
-<input
-    id="email"
-    type="email"
-    placeholder="Enter your email"
-    autocomplete="email"
-    required
->
-
-<label>
-Password
-</label>
-
-<input
-    id="password"
-    type="password"
-    placeholder="Enter your password"
-    autocomplete="current-password"
-    required
->
-
-<button
-    id="loginButton"
-    type="submit"
->
-LOGIN
-</button>
-
-</form>
-
-<div
-    id="message"
-    class="message"
-></div>
-
-<div class="signup">
-
-Don't have an account?
-
-<a href="/signup">
-Create account
-</a>
-
-</div>
-
-</div>
 
 <script>
+
+
+/* ============================================================
+   GET LOGIN ELEMENTS
+   ============================================================ */
 
 const form =
     document.getElementById(
@@ -360,16 +1104,20 @@ form.addEventListener(
 
         event.preventDefault();
 
+
         message.textContent =
             "Logging in...";
 
+
         loginButton.disabled =
             true;
+
 
         const email =
             document.getElementById(
                 "email"
             ).value.trim();
+
 
         const password =
             document.getElementById(
@@ -390,6 +1138,7 @@ form.addEventListener(
                 false;
 
             return;
+
         }
 
 
@@ -402,10 +1151,16 @@ form.addEventListener(
                 false;
 
             return;
+
         }
 
 
         try {
+
+
+            /* =================================================
+               SEND LOGIN REQUEST
+               ================================================= */
 
             const response =
                 await fetch(
@@ -443,6 +1198,7 @@ form.addEventListener(
 
             let data = {};
 
+
             try {
 
                 data =
@@ -467,21 +1223,20 @@ form.addEventListener(
                 data.success === true
             ) {
 
+
                 message.textContent =
                     "Login successful.";
 
-                
-                /*
-                 * Save the actual logged-in user's
-                 * information returned by the backend.
-                 *
-                 * This is NOT hardcoded to Suresh.
-                 */
+
+                /* ---------------------------------------------
+                   SAVE USER NAME
+                   --------------------------------------------- */
 
                 if (
                     data.user &&
                     typeof data.user === "object"
                 ) {
+
 
                     if (
                         data.user.name
@@ -493,6 +1248,7 @@ form.addEventListener(
                         );
 
                     }
+
                     else if (
                         data.user.email
                     ) {
@@ -504,6 +1260,10 @@ form.addEventListener(
 
                     }
 
+
+                    /* -----------------------------------------
+                       SAVE USER EMAIL
+                       ----------------------------------------- */
 
                     if (
                         data.user.email
@@ -517,13 +1277,14 @@ form.addEventListener(
                     }
 
                 }
+
+
                 else {
 
-                    /*
-                     * Fallback.
-                     * If backend doesn't return a name,
-                     * use the login email.
-                     */
+
+                    /* -----------------------------------------
+                       FALLBACK
+                       ----------------------------------------- */
 
                     localStorage.setItem(
                         "neonsocial_user_name",
@@ -538,9 +1299,9 @@ form.addEventListener(
                 }
 
 
-                /*
-                 * Go to the main NeonSocial dashboard.
-                 */
+                /* ---------------------------------------------
+                   GO TO DASHBOARD
+                   --------------------------------------------- */
 
                 window.location.href =
                     "/";
@@ -562,15 +1323,20 @@ form.addEventListener(
                 false;
 
         }
+
+
         catch(error) {
+
 
             console.error(
                 "Login error:",
                 error
             );
 
+
             message.textContent =
                 "Unable to connect to server.";
+
 
             loginButton.disabled =
                 false;
@@ -580,9 +1346,558 @@ form.addEventListener(
     }
 );
 
+
+
+/* ============================================================
+   FORGOT ACCESS KEY
+   ============================================================ */
+
+const forgotPasswordBtn =
+    document.getElementById(
+        "forgotPasswordBtn"
+    );
+
+const resetPasswordPanel =
+    document.getElementById(
+        "resetPasswordPanel"
+    );
+
+const resetPasswordBtn =
+    document.getElementById(
+        "resetPasswordBtn"
+    );
+
+const resetEmail =
+    document.getElementById(
+        "resetEmail"
+    );
+
+const resetNewPassword =
+    document.getElementById(
+        "resetNewPassword"
+    );
+
+const resetConfirmPassword =
+    document.getElementById(
+        "resetConfirmPassword"
+    );
+
+const resetPasswordMessage =
+    document.getElementById(
+        "resetPasswordMessage"
+    );
+
+const closeResetPassword =
+    document.getElementById(
+        "closeResetPassword"
+    );
+
+
+/* ============================================================
+   OPEN RESET PANEL
+   ============================================================ */
+
+forgotPasswordBtn.addEventListener(
+    "click",
+    function() {
+
+
+        /* ---------------------------------------------
+           Toggle panel
+           --------------------------------------------- */
+
+        if (
+            resetPasswordPanel.style.display ===
+            "none"
+        ) {
+
+            resetPasswordPanel.style.display =
+                "block";
+
+
+            /* -----------------------------------------
+               Automatically use login email
+               ----------------------------------------- */
+
+            const loginEmail =
+                document.getElementById(
+                    "email"
+                ).value.trim();
+
+
+            if (loginEmail) {
+
+                resetEmail.value =
+                    loginEmail;
+
+            }
+
+
+            resetPasswordMessage.textContent =
+                "";
+
+            resetPasswordMessage.classList.remove(
+                "show"
+            );
+
+
+            /* -----------------------------------------
+               Focus email if empty
+               ----------------------------------------- */
+
+            if (!resetEmail.value) {
+
+                resetEmail.focus();
+
+            }
+
+            else {
+
+                resetNewPassword.focus();
+
+            }
+
+        }
+
+        else {
+
+            resetPasswordPanel.style.display =
+                "none";
+
+        }
+
+    }
+);
+
+
+
+/* ============================================================
+   CLOSE RESET PANEL
+   ============================================================ */
+
+closeResetPassword.addEventListener(
+    "click",
+    function() {
+
+        resetPasswordPanel.style.display =
+            "none";
+
+        resetPasswordMessage.textContent =
+            "";
+
+        resetEmail.value =
+            "";
+
+        resetNewPassword.value =
+            "";
+
+        resetConfirmPassword.value =
+            "";
+
+    }
+);
+
+
+
+/* ============================================================
+   RESET PASSWORD
+   ============================================================ */
+
+resetPasswordBtn.addEventListener(
+    "click",
+    async function() {
+
+
+        const email =
+            resetEmail.value.trim();
+
+
+        const newPassword =
+            resetNewPassword.value;
+
+
+        const confirmPassword =
+            resetConfirmPassword.value;
+
+
+        /* ====================================================
+           CLEAR OLD MESSAGE
+           ==================================================== */
+
+        resetPasswordMessage.textContent =
+            "";
+
+        resetPasswordMessage.classList.remove(
+            "show"
+        );
+
+
+        /* ====================================================
+           VALIDATE EMAIL
+           ==================================================== */
+
+        if (!email) {
+
+            resetPasswordMessage.textContent =
+                "Enter your registered email.";
+
+            resetPasswordMessage.classList.add(
+                "show"
+            );
+
+            resetEmail.focus();
+
+            return;
+
+        }
+
+
+        /* ====================================================
+           VALIDATE PASSWORD
+           ==================================================== */
+
+        if (
+            newPassword.length < 8
+        ) {
+
+            resetPasswordMessage.textContent =
+                "Password must contain at least 8 characters.";
+
+            resetPasswordMessage.classList.add(
+                "show"
+            );
+
+            resetNewPassword.focus();
+
+            return;
+
+        }
+
+
+        /* ====================================================
+           CONFIRM PASSWORD
+           ==================================================== */
+
+        if (
+            newPassword !==
+            confirmPassword
+        ) {
+
+            resetPasswordMessage.textContent =
+                "Passwords do not match.";
+
+            resetPasswordMessage.classList.add(
+                "show"
+            );
+
+            resetConfirmPassword.focus();
+
+            return;
+
+        }
+
+
+        /* ====================================================
+           LOADING
+           ==================================================== */
+
+        const originalButtonText =
+            resetPasswordBtn.innerHTML;
+
+
+        resetPasswordBtn.disabled =
+            true;
+
+
+        resetPasswordBtn.innerHTML =
+            "RESETTING...";
+
+
+        try {
+
+
+            /* =================================================
+               SEND RESET REQUEST
+               ================================================= */
+
+            const response =
+                await fetch(
+                    "/api/auth/reset-password",
+                    {
+
+                        method: "POST",
+
+                        credentials: "include",
+
+                        headers: {
+
+                            "Content-Type":
+                                "application/json",
+
+                            "Accept":
+                                "application/json"
+
+                        },
+
+                        body:
+                            JSON.stringify({
+
+                                email:
+                                    email,
+
+                                new_password:
+                                    newPassword,
+
+                                confirm_password:
+                                    confirmPassword
+
+                            })
+
+                    }
+                );
+
+
+            let data = {};
+
+
+            try {
+
+                data =
+                    await response.json();
+
+            }
+            catch (
+                jsonError
+            ) {
+
+                data = {};
+
+            }
+
+
+            /* =================================================
+               RESET SUCCESS
+               ================================================= */
+
+            if (
+                response.ok &&
+                data.success === true
+            ) {
+
+
+                resetPasswordMessage.style.color =
+                    "#00ff9d";
+
+
+                resetPasswordMessage.textContent =
+                    data.message ||
+                    "Password reset successfully.";
+
+
+                resetPasswordMessage.classList.add(
+                    "show"
+                );
+
+
+                /* ---------------------------------------------
+                   Clear password fields
+                   --------------------------------------------- */
+
+                resetNewPassword.value =
+                    "";
+
+                resetConfirmPassword.value =
+                    "";
+
+
+                /* ---------------------------------------------
+                   After a short delay close reset panel
+                   --------------------------------------------- */
+
+                setTimeout(
+                    function() {
+
+                        resetPasswordPanel.style.display =
+                            "none";
+
+
+                        resetPasswordMessage.textContent =
+                            "";
+
+                        resetPasswordMessage.style.color =
+                            "#ff5c91";
+
+
+                        /* -----------------------------
+                           Put email into login form
+                           ----------------------------- */
+
+                        document.getElementById(
+                            "email"
+                        ).value =
+                            email;
+
+
+                        /* -----------------------------
+                           Focus login password
+                           ----------------------------- */
+
+                        document.getElementById(
+                            "password"
+                        ).focus();
+
+
+                        message.style.color =
+                            "#00ff9d";
+
+
+                        message.textContent =
+                            "Access key updated. You can now login.";
+
+
+                        setTimeout(
+                            function() {
+
+                                message.textContent =
+                                    "";
+
+                                message.style.color =
+                                    "#ff6b9d";
+
+                            },
+                            4000
+                        );
+
+                    },
+                    1500
+                );
+
+
+                return;
+
+            }
+
+
+            /* =================================================
+               RESET FAILED
+               ================================================= */
+
+            resetPasswordMessage.style.color =
+                "#ff5c91";
+
+
+            resetPasswordMessage.textContent =
+                data.error ||
+                "Unable to reset access key.";
+
+
+            resetPasswordMessage.classList.add(
+                "show"
+            );
+
+
+        }
+
+
+        catch(error) {
+
+
+            console.error(
+                "Password reset error:",
+                error
+            );
+
+
+            resetPasswordMessage.style.color =
+                "#ff5c91";
+
+
+            resetPasswordMessage.textContent =
+                "Unable to connect to server.";
+
+
+            resetPasswordMessage.classList.add(
+                "show"
+            );
+
+        }
+
+
+        finally {
+
+
+            resetPasswordBtn.disabled =
+                false;
+
+
+            resetPasswordBtn.innerHTML =
+                originalButtonText;
+
+        }
+
+    }
+);
+
+
+/* ============================================================
+   ENTER KEY SUPPORT FOR RESET PASSWORD
+   ============================================================ */
+
+[
+    resetEmail,
+    resetNewPassword,
+    resetConfirmPassword
+].forEach(
+    function(input) {
+
+        input.addEventListener(
+            "keydown",
+            function(event) {
+
+                if (
+                    event.key ===
+                    "Enter"
+                ) {
+
+                    event.preventDefault();
+
+                    resetPasswordBtn.click();
+
+                }
+
+            }
+        );
+
+    }
+);
+
+
+/* ============================================================
+   AUTO-FILL RESET EMAIL FROM LOGIN EMAIL
+   ============================================================ */
+
+document.getElementById(
+    "email"
+).addEventListener(
+    "input",
+    function() {
+
+        if (
+            resetPasswordPanel.style.display !==
+            "none"
+        ) {
+
+            resetEmail.value =
+                this.value;
+
+        }
+
+    }
+);
+
+
 </script>
 
 </body>
 
 </html>
-```
