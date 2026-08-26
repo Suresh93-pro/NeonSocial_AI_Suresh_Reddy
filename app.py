@@ -60,9 +60,10 @@ from backend.auth import (
     get_current_user,
     login_user,
     logout_user,
-    reset_password,
     login_required_api,
-    login_required_page
+    login_required_page,
+    get_db,
+    using_postgres
 )
 
 
@@ -1274,6 +1275,283 @@ ai_chat = universal_neon_ai_chat
 # ============================================================
 # AUTHENTICATION API
 # ============================================================
+# ============================================================
+# TEMPORARY USER MIGRATION
+# SQLITE -> RENDER POSTGRESQL
+#
+# IMPORTANT:
+# This route is temporary.
+# Remove it immediately after migration succeeds.
+# ============================================================
+
+@app.route(
+    "/api/internal/migrate-users",
+    methods=["POST"]
+)
+def temporary_migrate_users():
+
+    migration_token = os.getenv(
+        "MIGRATION_TOKEN",
+        ""
+    ).strip()
+
+    supplied_token = request.headers.get(
+        "X-Migration-Token",
+        ""
+    ).strip()
+
+    # --------------------------------------------------------
+    # SECURITY CHECK
+    # --------------------------------------------------------
+
+    if not migration_token:
+        return jsonify({
+            "success": False,
+            "error": "Migration is not configured."
+        }), 503
+
+    if not supplied_token:
+        return jsonify({
+            "success": False,
+            "error": "Migration token required."
+        }), 401
+
+    if supplied_token != migration_token:
+        return jsonify({
+            "success": False,
+            "error": "Invalid migration token."
+        }), 403
+
+    # --------------------------------------------------------
+    # ONLY ALLOW POSTGRESQL
+    # --------------------------------------------------------
+
+    if not using_postgres():
+
+        return jsonify({
+            "success": False,
+            "error": "PostgreSQL is not active."
+        }), 503
+
+    # --------------------------------------------------------
+    # READ PAYLOAD
+    # --------------------------------------------------------
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+    users = data.get(
+        "users",
+        []
+    )
+
+    if not isinstance(
+        users,
+        list
+    ):
+
+        return jsonify({
+            "success": False,
+            "error": "Invalid users payload."
+        }), 400
+
+    if len(users) > 100:
+
+        return jsonify({
+            "success": False,
+            "error": "Too many users."
+        }), 400
+
+    # --------------------------------------------------------
+    # DATABASE
+    # --------------------------------------------------------
+
+    connection = None
+
+    migrated = 0
+    already_exists = 0
+    failed = 0
+
+    try:
+
+        connection = get_db()
+
+        cursor = connection.cursor()
+
+        for user in users:
+
+            if not isinstance(
+                user,
+                dict
+            ):
+                failed += 1
+                continue
+
+            name = str(
+                user.get(
+                    "name",
+                    ""
+                )
+            ).strip()
+
+            email = str(
+                user.get(
+                    "email",
+                    ""
+                )
+            ).strip().lower()
+
+            password_hash = str(
+                user.get(
+                    "password_hash",
+                    ""
+                )
+            ).strip()
+
+            created_at = str(
+                user.get(
+                    "created_at",
+                    ""
+                )
+            ).strip()
+
+            # ------------------------------------------------
+            # BASIC VALIDATION
+            # ------------------------------------------------
+
+            if not email:
+                failed += 1
+                continue
+
+            if not password_hash:
+                failed += 1
+                continue
+
+            if not created_at:
+
+                from datetime import datetime, timezone
+
+                created_at = datetime.now(
+                    timezone.utc
+                ).isoformat()
+
+            # ------------------------------------------------
+            # CHECK EXISTING USER
+            # ------------------------------------------------
+
+            cursor.execute(
+                """
+                SELECT id
+                FROM users
+                WHERE email = %s
+                """,
+                (
+                    email,
+                )
+            )
+
+            existing = cursor.fetchone()
+
+            if existing:
+
+                already_exists += 1
+                continue
+
+            # ------------------------------------------------
+            # INSERT EXISTING PASSWORD HASH
+            #
+            # We do NOT know or transfer the plaintext
+            # password.
+            #
+            # The existing password hash is preserved.
+            # ------------------------------------------------
+
+            cursor.execute(
+                """
+                INSERT INTO users
+                (
+                    name,
+                    email,
+                    password_hash,
+                    created_at
+                )
+                VALUES
+                (
+                    %s,
+                    %s,
+                    %s,
+                    %s
+                )
+                """,
+                (
+                    name,
+                    email,
+                    password_hash,
+                    created_at
+                )
+            )
+
+            migrated += 1
+
+        connection.commit()
+
+        cursor.close()
+
+        return jsonify({
+
+            "success":
+                True,
+
+            "message":
+                "User migration completed.",
+
+            "migrated":
+                migrated,
+
+            "already_exists":
+                already_exists,
+
+            "failed":
+                failed,
+
+            "total_received":
+                len(users)
+
+        })
+
+    except Exception as error:
+
+        if connection:
+
+            try:
+                connection.rollback()
+            except Exception:
+                pass
+
+        print(
+            "Temporary migration error:",
+            error
+        )
+
+        return jsonify({
+
+            "success":
+                False,
+
+            "error":
+                "Migration failed."
+
+        }), 500
+
+    finally:
+
+        if connection:
+
+            try:
+                connection.close()
+            except Exception:
+                pass
 # ============================================================
 # SIGNUP PAGE
 # ============================================================
