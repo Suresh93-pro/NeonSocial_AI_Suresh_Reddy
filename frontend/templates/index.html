@@ -3325,7 +3325,739 @@
 
 </script>
 
+<!-- ============================================================
+     NEON AI PLUS — ADDITIVE FEATURE LAYER
+     Built by SURESH REDDY
+     Does NOT replace the existing NeonSocial UI.
+============================================================ -->
 
+<style>
+/* ---------- NEON AI PLUS ---------- */
+
+.neon-plus-launcher {
+    position: fixed;
+    right: 28px;
+    bottom: 28px;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,245,255,.55);
+    background:
+        radial-gradient(circle at center,
+        rgba(0,245,255,.30),
+        rgba(10,15,35,.96) 65%);
+    color: #00f5ff;
+    font-size: 25px;
+    cursor: pointer;
+    z-index: 99999;
+    box-shadow:
+        0 0 15px rgba(0,245,255,.35),
+        0 0 45px rgba(0,245,255,.15);
+    transition: .25s ease;
+}
+
+.neon-plus-launcher:hover {
+    transform: scale(1.1);
+    box-shadow:
+        0 0 20px rgba(0,245,255,.7),
+        0 0 65px rgba(0,245,255,.3);
+}
+
+.neon-plus-window {
+    position: fixed;
+    right: 28px;
+    bottom: 105px;
+    width: min(470px, calc(100vw - 35px));
+    height: min(680px, calc(100vh - 130px));
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 99998;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(10,18,40,.98),
+            rgba(5,8,25,.98)
+        );
+
+    border: 1px solid rgba(0,245,255,.25);
+    border-radius: 22px;
+
+    box-shadow:
+        0 0 30px rgba(0,245,255,.18),
+        0 25px 100px rgba(0,0,0,.55);
+
+    backdrop-filter: blur(25px);
+}
+
+.neon-plus-window.open {
+    display: flex;
+    animation: neonPlusIn .25s ease;
+}
+
+@keyframes neonPlusIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.neon-plus-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 17px 18px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.neon-plus-core {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: #00f5ff;
+    font-weight: 900;
+    border: 1px solid rgba(0,245,255,.5);
+    box-shadow: 0 0 20px rgba(0,245,255,.2);
+}
+
+.neon-plus-title {
+    flex: 1;
+}
+
+.neon-plus-title strong {
+    display: block;
+    color: white;
+    font-size: 15px;
+}
+
+.neon-plus-title span {
+    display: block;
+    margin-top: 3px;
+    color: #00f5ff;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+}
+
+.neon-plus-close {
+    background: transparent;
+    border: 0;
+    color: #8b9bbb;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.neon-plus-tools {
+    display: flex;
+    gap: 7px;
+    padding: 10px 12px;
+    overflow-x: auto;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+}
+
+.neon-plus-tool {
+    white-space: nowrap;
+    padding: 7px 11px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.1);
+    background: rgba(255,255,255,.04);
+    color: #b9c7e5;
+    cursor: pointer;
+    font-size: 11px;
+}
+
+.neon-plus-tool:hover,
+.neon-plus-tool.active {
+    color: #00f5ff;
+    border-color: rgba(0,245,255,.4);
+    background: rgba(0,245,255,.08);
+}
+
+.neon-plus-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px;
+}
+
+.neon-plus-message {
+    display: flex;
+    gap: 9px;
+    margin-bottom: 15px;
+}
+
+.neon-plus-message.user {
+    justify-content: flex-end;
+}
+
+.neon-plus-avatar {
+    width: 29px;
+    height: 29px;
+    flex: 0 0 29px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(0,245,255,.1);
+    border: 1px solid rgba(0,245,255,.25);
+    color: #00f5ff;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.neon-plus-bubble {
+    max-width: 82%;
+    padding: 11px 13px;
+    border-radius: 15px;
+    color: #dbe5ff;
+    background: rgba(255,255,255,.055);
+    border: 1px solid rgba(255,255,255,.07);
+    font-size: 13px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.neon-plus-message.user .neon-plus-bubble {
+    color: white;
+    background: rgba(0,245,255,.1);
+    border-color: rgba(0,245,255,.2);
+}
+
+.neon-plus-thinking {
+    opacity: .65;
+    font-style: italic;
+}
+
+.neon-plus-input-area {
+    padding: 12px;
+    border-top: 1px solid rgba(255,255,255,.08);
+}
+
+.neon-plus-input-row {
+    display: flex;
+    gap: 8px;
+}
+
+.neon-plus-input {
+    flex: 1;
+    min-width: 0;
+    resize: none;
+    height: 46px;
+    max-height: 130px;
+    padding: 13px 14px;
+    border-radius: 13px;
+    outline: none;
+    color: white;
+    background: rgba(255,255,255,.045);
+    border: 1px solid rgba(255,255,255,.1);
+    font-family: inherit;
+}
+
+.neon-plus-input:focus {
+    border-color: rgba(0,245,255,.4);
+    box-shadow: 0 0 20px rgba(0,245,255,.07);
+}
+
+.neon-plus-send {
+    width: 48px;
+    border-radius: 13px;
+    border: 1px solid rgba(0,245,255,.35);
+    background: rgba(0,245,255,.1);
+    color: #00f5ff;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.neon-plus-send:hover {
+    background: rgba(0,245,255,.18);
+}
+
+.neon-plus-hint {
+    margin-top: 8px;
+    color: #667695;
+    font-size: 9px;
+    text-align: center;
+}
+
+.neon-plus-status {
+    color: #62f7a4;
+    font-size: 9px;
+    letter-spacing: 1px;
+}
+
+.neon-plus-error {
+    color: #ff6b8a;
+}
+</style>
+
+<button
+    id="neonPlusLauncher"
+    class="neon-plus-launcher"
+    title="Open Neon AI"
+>
+    N
+</button>
+
+<div
+    id="neonPlusWindow"
+    class="neon-plus-window"
+>
+
+    <div class="neon-plus-header">
+
+        <div class="neon-plus-core">
+            N
+        </div>
+
+        <div class="neon-plus-title">
+            <strong>Neon AI</strong>
+            <span>
+                UNIVERSAL INTELLIGENCE
+            </span>
+        </div>
+
+        <span
+            id="neonPlusStatus"
+            class="neon-plus-status"
+        >
+            ONLINE
+        </span>
+
+        <button
+            id="neonPlusClose"
+            class="neon-plus-close"
+        >
+            ×
+        </button>
+
+    </div>
+
+    <div class="neon-plus-tools">
+
+        <button
+            class="neon-plus-tool active"
+            data-mode="general"
+        >
+            ✦ General
+        </button>
+
+        <button
+            class="neon-plus-tool"
+            data-mode="coding"
+        >
+            💻 Coding
+        </button>
+
+        <button
+            class="neon-plus-tool"
+            data-mode="learning"
+        >
+            🧠 Learning
+        </button>
+
+        <button
+            class="neon-plus-tool"
+            data-mode="social"
+        >
+            📱 Social
+        </button>
+
+        <button
+            class="neon-plus-tool"
+            data-mode="career"
+        >
+            🚀 Career
+        </button>
+
+    </div>
+
+    <div
+        id="neonPlusMessages"
+        class="neon-plus-messages"
+    >
+
+        <div class="neon-plus-message">
+
+            <div class="neon-plus-avatar">
+                N
+            </div>
+
+            <div class="neon-plus-bubble">
+                Hello! I'm Neon AI.
+
+                Ask me anything — programming, DSA,
+                Java, C, AI, cybersecurity, projects,
+                mathematics, science, career,
+                social media, writing, business,
+                or general questions.
+
+                I can also help you step-by-step.
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="neon-plus-input-area">
+
+        <div class="neon-plus-input-row">
+
+            <textarea
+                id="neonPlusInput"
+                class="neon-plus-input"
+                placeholder="Ask Neon AI anything..."
+            ></textarea>
+
+            <button
+                id="neonPlusSend"
+                class="neon-plus-send"
+            >
+                ➤
+            </button>
+
+        </div>
+
+        <div class="neon-plus-hint">
+            ENTER = SEND • SHIFT + ENTER = NEW LINE
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+/* ============================================================
+   NEON AI PLUS CONTROLLER
+============================================================ */
+
+(function () {
+
+    "use strict";
+
+    const launcher =
+        document.getElementById(
+            "neonPlusLauncher"
+        );
+
+    const windowEl =
+        document.getElementById(
+            "neonPlusWindow"
+        );
+
+    const closeBtn =
+        document.getElementById(
+            "neonPlusClose"
+        );
+
+    const input =
+        document.getElementById(
+            "neonPlusInput"
+        );
+
+    const sendBtn =
+        document.getElementById(
+            "neonPlusSend"
+        );
+
+    const messages =
+        document.getElementById(
+            "neonPlusMessages"
+        );
+
+    const status =
+        document.getElementById(
+            "neonPlusStatus"
+        );
+
+    let currentMode = "general";
+
+    function openAI() {
+
+        windowEl.classList.add(
+            "open"
+        );
+
+        setTimeout(function () {
+
+            input.focus();
+
+        }, 100);
+
+    }
+
+    function closeAI() {
+
+        windowEl.classList.remove(
+            "open"
+        );
+
+    }
+
+    function addMessage(
+        text,
+        type
+    ) {
+
+        const wrapper =
+            document.createElement(
+                "div"
+            );
+
+        wrapper.className =
+            "neon-plus-message " +
+            type;
+
+        if (type === "ai") {
+
+            wrapper.innerHTML =
+                '<div class="neon-plus-avatar">N</div>' +
+                '<div class="neon-plus-bubble"></div>';
+
+            wrapper.querySelector(
+                ".neon-plus-bubble"
+            ).textContent = text;
+
+        } else {
+
+            wrapper.innerHTML =
+                '<div class="neon-plus-bubble"></div>';
+
+            wrapper.querySelector(
+                ".neon-plus-bubble"
+            ).textContent = text;
+
+        }
+
+        messages.appendChild(
+            wrapper
+        );
+
+        messages.scrollTop =
+            messages.scrollHeight;
+
+        return wrapper;
+
+    }
+
+    function setThinking() {
+
+        return addMessage(
+            "Neon AI is thinking...",
+            "ai"
+        );
+
+    }
+
+    async function askNeon(message) {
+
+        const thinking =
+            setThinking();
+
+        thinking
+            .querySelector(
+                ".neon-plus-bubble"
+            )
+            .classList.add(
+                "neon-plus-thinking"
+            );
+
+        status.textContent =
+            "THINKING...";
+
+        status.style.color =
+            "#00f5ff";
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/ai-chat",
+                    {
+                        method: "POST",
+
+                        credentials: "include",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json",
+
+                            "Accept":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            message:
+                                "[Mode: " +
+                                currentMode +
+                                "]\n\n" +
+                                message
+                        })
+                    }
+                );
+
+            let data = null;
+
+            try {
+
+                data =
+                    await response.json();
+
+            } catch (error) {
+
+                data = null;
+
+            }
+
+            thinking.remove();
+
+            if (
+    !response.ok ||
+    !data
+) {
+
+    throw new Error(
+        data &&
+        data.error
+            ? data.error
+            : "AI request failed."
+    );
+
+}
+            addMessage(
+                data.response ||
+                "Neon AI returned an empty response.",
+                "ai"
+            );
+
+            status.textContent =
+                "ONLINE";
+
+            status.style.color =
+                "#62f7a4";
+
+        } catch (error) {
+
+            thinking.remove();
+
+            addMessage(
+                "Neon AI error: " +
+                error.message,
+                "ai"
+            );
+
+            status.textContent =
+                "ERROR";
+
+            status.style.color =
+                "#ff6b8a";
+
+        }
+
+    }
+
+    async function sendMessage() {
+
+        const message =
+            input.value.trim();
+
+        if (!message) {
+            return;
+        }
+
+        addMessage(
+            message,
+            "user"
+        );
+
+        input.value = "";
+
+        await askNeon(
+            message
+        );
+
+    }
+
+    launcher.addEventListener(
+        "click",
+        openAI
+    );
+
+    closeBtn.addEventListener(
+        "click",
+        closeAI
+    );
+
+    sendBtn.addEventListener(
+        "click",
+        sendMessage
+    );
+
+    input.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (
+                event.key === "Enter" &&
+                !event.shiftKey
+            ) {
+
+                event.preventDefault();
+
+                sendMessage();
+
+            }
+
+        }
+    );
+
+    document
+        .querySelectorAll(
+            ".neon-plus-tool"
+        )
+        .forEach(
+            function (button) {
+
+                button.addEventListener(
+                    "click",
+                    function () {
+
+                        document
+                            .querySelectorAll(
+                                ".neon-plus-tool"
+                            )
+                            .forEach(
+                                function (item) {
+
+                                    item.classList.remove(
+                                        "active"
+                                    );
+
+                                }
+                            );
+
+                        button.classList.add(
+                            "active"
+                        );
+
+                        currentMode =
+                            button.dataset.mode ||
+                            "general";
+
+                        input.focus();
+
+                    }
+                );
+
+            }
+        );
+
+})();
+</script>
 </body>
 
 </html>
